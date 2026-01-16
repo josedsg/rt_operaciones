@@ -56,6 +56,12 @@ export function PedidoForm({ pedidoId }: PedidoFormProps) {
                             producto_nombre: l.producto.nombre,
                             variante_nombre: l.variante.nombre,
                             tamano_nombre: l.tamano.nombre,
+                            empaque_nombre: l.empaque?.nombre,
+                            assorted_config: l.configuraciones_assorted ? l.configuraciones_assorted.map((ca: any) => ({
+                                variante_id: ca.variante_id,
+                                cantidad: ca.cantidad,
+                                variante_nombre: ca.variante?.nombre
+                            })) : []
                         }))
                     });
                 } else {

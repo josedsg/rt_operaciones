@@ -13,6 +13,7 @@ export type LineaPedidoInput = {
     variante_id: number;
     tamano_id: number;
     proveedor_id?: number;
+    empaque_id?: number;
     cantidad: number;
     precio_unitario: number;
     precio_proveedor: number;
@@ -30,6 +31,13 @@ export type LineaPedidoInput = {
     variante_nombre?: string;
     tamano_nombre?: string;
     empaque_nombre?: string;
+    assorted_config?: ConfiguracionAssortedInput[];
+};
+
+export type ConfiguracionAssortedInput = {
+    variante_id: number;
+    cantidad: number;
+    variante_nombre?: string;
 };
 
 export type PedidoVentaInput = {
@@ -115,6 +123,7 @@ export async function createPedidoAction(dataRaw: PedidoVentaInput) {
                 variante_id: linea.variante_id,
                 tamano_id: linea.tamano_id,
                 proveedor_id: linea.proveedor_id || null,
+                empaque_id: linea.empaque_id || null,
                 cantidad: linea.cantidad,
                 precio_unitario: linea.precio_unitario,
                 precio_proveedor: linea.precio_proveedor || 0,
@@ -130,6 +139,12 @@ export async function createPedidoAction(dataRaw: PedidoVentaInput) {
                 stems_per_bunch: linea.stems_per_bunch,
                 bunches_per_box: linea.bunches_per_box,
                 stems_per_box: linea.stems_per_box,
+                configuraciones_assorted: linea.assorted_config && linea.assorted_config.length > 0 ? {
+                    create: linea.assorted_config.map(ac => ({
+                        variante_id: ac.variante_id,
+                        cantidad: ac.cantidad
+                    }))
+                } : undefined
             };
         });
 
@@ -269,7 +284,13 @@ export async function getPedidoByIdAction(id: number) {
                         producto: { select: { nombre: true } },
                         familia: { select: { nombre_cientifico: true } },
                         variante: { select: { nombre: true } },
-                        tamano: { select: { nombre: true } }
+                        tamano: { select: { nombre: true } },
+                        empaque: { select: { nombre: true } },
+                        configuraciones_assorted: {
+                            include: {
+                                variante: { select: { nombre: true } }
+                            }
+                        }
                     }
                 }
             }

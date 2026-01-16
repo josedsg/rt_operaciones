@@ -188,6 +188,7 @@ model Variante {
   configuraciones    ConfiguracionPermitida[]
   productos_maestros ProductoMaestro[]
   lineas_venta       LineaPedidoVenta[]
+  configuraciones_assorted ConfiguracionAssorted[]
 
   @@map("variantes")
 }
@@ -301,6 +302,9 @@ model LineaPedidoVenta {
   proveedor_id       Int?
   proveedor          Proveedor? @relation(fields: [proveedor_id], references: [id])
   
+  empaque_id         Int?
+  empaque            Empaque?   @relation(fields: [empaque_id], references: [id])
+
   po                 String?
   cajas              Int       @default(0)
   stems_per_bunch    Int       @default(0)
@@ -324,7 +328,23 @@ model LineaPedidoVenta {
   fecha_creacion     DateTime? @default(now())
   fecha_modificacion DateTime? @updatedAt
 
+  configuraciones_assorted ConfiguracionAssorted[]
+
   @@map("lineas_pedidos_ventas")
+}
+
+model ConfiguracionAssorted {
+  id                 Int              @id @default(autoincrement())
+  linea_pedido_id    Int
+  linea_pedido       LineaPedidoVenta @relation(fields: [linea_pedido_id], references: [id], onDelete: Cascade)
+  variante_id        Int
+  variante           Variante         @relation(fields: [variante_id], references: [id])
+  cantidad           Int              @default(0)
+  
+  fecha_creacion     DateTime?        @default(now())
+  fecha_modificacion DateTime?        @updatedAt
+
+  @@map("config_assorted")
 }
 
 model ProductoProveedor {
@@ -368,6 +388,7 @@ model Empaque {
   
   fecha_creacion     DateTime? @default(now())
   fecha_modificacion DateTime? @updatedAt
+  lineas_venta       LineaPedidoVenta[]
 
   @@map("empaques")
 }

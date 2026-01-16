@@ -1,8 +1,11 @@
 "use client";
 
+
 import { PedidoVentaInput, uploadInvoiceFilesAction } from "@/actions/ventas";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import Image from "next/image";
+import logo from "@/assets/logos/rio-tapezco-logo.png";
 
 interface StepResumenProps {
     data: PedidoVentaInput;
@@ -59,15 +62,15 @@ export function StepResumen({ data, updateData }: StepResumenProps) {
                 <div className="p-8 pb-4">
                     <div className="flex justify-between items-start">
                         <div>
-                            {/* Logo Simulation */}
+                            {/* Logo Real */}
                             <div className="flex items-center gap-2 mb-2">
-                                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M20 0L40 34.641H0L20 0Z" fill="#167e35" />
-                                </svg>
-                                <div className="flex flex-col">
-                                    <h1 className="text-3xl font-black text-gray-800 dark:text-white tracking-tight leading-none">
-                                        Río <span className="text-[#167e35]">Tapezco</span>
-                                    </h1>
+                                <div className="relative h-16 w-auto bg-[#1c2434] p-2 rounded-md print:bg-black">
+                                    <Image
+                                        src={logo}
+                                        alt="Rio Tapezco Logo"
+                                        className="h-full w-auto object-contain"
+                                        priority
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -82,7 +85,7 @@ export function StepResumen({ data, updateData }: StepResumenProps) {
                     {/* FROM */}
                     <div className="p-6 border-r border-stroke dark:border-strokedark">
                         <h3 className="font-bold text-[#167e35] mb-2 uppercase text-xs tracking-wider">From:</h3>
-                        <p className="font-bold text-black dark:text-white">RIO TAPEZCO CORP</p>
+                        <p className="font-bold text-black dark:text-white">RIO TAPEZCO</p>
                         <p className="text-gray-600 dark:text-gray-300">3785 NW 82 ND Ave</p>
                         <p className="text-gray-600 dark:text-gray-300">Doral, Florida 33166</p>
                         <p className="text-gray-600 dark:text-gray-300">Estados Unidos</p>
@@ -174,10 +177,10 @@ export function StepResumen({ data, updateData }: StepResumenProps) {
                         <thead>
                             <tr>
                                 <th className="bg-gray-100 text-[#167e35] font-bold text-xs uppercase py-2 px-2 border border-stroke dark:border-strokedark text-left">Description</th>
-                                <th className="bg-gray-100 text-[#167e35] font-bold text-xs uppercase py-2 px-1 border border-stroke dark:border-strokedark">PO</th>
-                                <th className="bg-gray-100 text-[#167e35] font-bold text-xs uppercase py-2 px-1 border border-stroke dark:border-strokedark w-16">Box Qty</th>
-                                <th className="bg-gray-100 text-[#167e35] font-bold text-xs uppercase py-2 px-1 border border-stroke dark:border-strokedark w-20">Stem/Box</th>
-                                <th className="bg-gray-100 text-[#167e35] font-bold text-xs uppercase py-2 px-1 border border-stroke dark:border-strokedark w-16">Qty</th>
+                                <th className="bg-gray-100 text-[#167e35] font-bold text-xs uppercase py-2 px-1 border border-stroke dark:border-strokedark text-center">PO</th>
+                                <th className="bg-gray-100 text-[#167e35] font-bold text-xs uppercase py-2 px-1 border border-stroke dark:border-strokedark text-center w-16">Box Qty</th>
+                                <th className="bg-gray-100 text-[#167e35] font-bold text-xs uppercase py-2 px-1 border border-stroke dark:border-strokedark text-center w-20">Stem/Box</th>
+                                <th className="bg-gray-100 text-[#167e35] font-bold text-xs uppercase py-2 px-1 border border-stroke dark:border-strokedark text-center w-16">Qty</th>
                                 <th className="bg-gray-100 text-[#167e35] font-bold text-xs uppercase py-2 px-2 border border-stroke dark:border-strokedark text-right">Unit Price</th>
                                 <th className="bg-gray-100 text-[#167e35] font-bold text-xs uppercase py-2 px-2 border border-stroke dark:border-strokedark text-right">Amount</th>
                             </tr>
@@ -186,11 +189,14 @@ export function StepResumen({ data, updateData }: StepResumenProps) {
                             {data.lineas.map((linea, key) => (
                                 <tr key={key}>
                                     <td className="border border-stroke dark:border-strokedark px-2 py-2 text-xs text-black dark:text-white">
-                                        <div className="font-bold">{linea.producto_nombre}</div>
-                                        <div className="text-[10px] text-gray-500">{linea.variante_nombre} {linea.tamano_nombre} {linea.empaque_nombre}</div>
+                                        <div className="font-bold">{linea.producto_nombre} {linea.tamano_nombre ? `- ${linea.tamano_nombre}` : ""}</div>
+                                        <div className="text-[10px] text-gray-500 uppercase">{linea.variante_nombre} {linea.empaque_nombre ? `/ ${linea.empaque_nombre}` : ""}</div>
                                     </td>
                                     <td className="border border-stroke dark:border-strokedark px-1 py-1 text-center text-xs">{linea.po || "—"}</td>
-                                    <td className="border border-stroke dark:border-strokedark px-1 py-1 text-center text-xs font-semibold">{linea.cajas}</td>
+                                    <td className="border border-stroke dark:border-strokedark px-1 py-1 text-center text-xs font-semibold">
+                                        {linea.cajas}
+                                        <div className="text-[9px] font-normal text-gray-500">{linea.empaque_nombre}</div>
+                                    </td>
                                     <td className="border border-stroke dark:border-strokedark px-1 py-1 text-center text-xs">{linea.stems_per_box}</td>
                                     <td className="border border-stroke dark:border-strokedark px-1 py-1 text-center text-xs font-bold">{linea.cantidad}</td>
                                     <td className="border border-stroke dark:border-strokedark px-2 py-1 text-right text-xs">{monedaSimbolo}{linea.precio_unitario.toFixed(3)}</td>
@@ -274,8 +280,8 @@ export function StepResumen({ data, updateData }: StepResumenProps) {
                             <label className="mb-1 block text-xs font-bold text-gray-500 uppercase">Estado Hacienda</label>
                             <select
                                 className={`w-full rounded border border-stroke py-3 px-4 outline-none text-sm font-bold ${data.estado_factura === 'ACEPTADO' ? 'bg-success/10 text-success border-success' :
-                                        data.estado_factura === 'RECHAZADO' ? 'bg-danger/10 text-danger border-danger' :
-                                            'bg-white dark:bg-boxdark'
+                                    data.estado_factura === 'RECHAZADO' ? 'bg-danger/10 text-danger border-danger' :
+                                        'bg-white dark:bg-boxdark'
                                     }`}
                                 value={data.estado_factura || "PENDIENTE"}
                                 onChange={(e) => updateData({ estado_factura: e.target.value })}

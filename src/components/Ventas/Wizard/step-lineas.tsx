@@ -2,13 +2,14 @@
 
 import { useEffect, useState, useMemo, useRef } from "react";
 import { Combobox } from "@/components/ui/Combobox";
-import { PedidoVentaInput, LineaPedidoInput, getProveedoresAction } from "@/actions/ventas";
+import { PedidoVentaInput, LineaPedidoInput, getProveedoresAction, ConfiguracionAssortedInput } from "@/actions/ventas";
 import { getFamiliasAction } from "@/actions/familias";
 import { getProductosMaestrosAction, ProductoMaestroWithRelations } from "@/actions/productos-maestros";
 import { getProductosByProveedorAction } from "@/actions/proveedores";
 import { getEmpaquesAction } from "@/actions/empaques";
 import { Familia, Proveedor } from "@prisma/client";
 import toast from "react-hot-toast";
+import { AssortedModal } from "./assorted-modal";
 
 interface StepLineasProps {
     data: PedidoVentaInput;
@@ -127,23 +128,114 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
         });
     }, [familias, searchFamilia, allowedProductIds, allProductos]);
 
-    const filteredProductos = useMemo(() => {
+    // State for cascading selection
+    const [selectedProductName, setSelectedProductName] = useState<string>("");
+    const [selectedVarianteId, setSelectedVarianteId] = useState<number>(0);
+    const [selectedTamanoId, setSelectedTamanoId] = useState<number>(0);
+    const [isAssortedModalOpen, setIsAssortedModalOpen] = useState(false);
+
+    // Initial filtered products (by Family + Provider)
+    const accessableProductos = useMemo(() => {
         if (!newLine.familia_id) return [];
         return allProductos.filter(p => {
             const matchesFamilia = p.familia_id === newLine.familia_id;
-            const matchesSearch = p.nombre.toLowerCase().includes(searchProducto.toLowerCase()) ||
-                (p.descripcion?.toLowerCase().includes(searchProducto.toLowerCase()));
-
-            // Si hay un proveedor seleccionado y tiene productos definidos, filtrar.
-            // Si el proveedor no tiene productos definidos (lista vacía), opcionalmente mostrar todos o ninguno.
-            // Según el requerimiento, la relación define qué productos PUEDEN ser usados.
-            // Si allowedProductIds es una lista vacía pero el proveedor está seleccionado, 
-            // significa que ese proveedor no tiene productos asignados.
             const isAllowedByProvider = allowedProductIds === null || allowedProductIds.includes(p.id);
-
-            return matchesFamilia && matchesSearch && isAllowedByProvider;
+            return matchesFamilia && isAllowedByProvider;
         });
-    }, [allProductos, newLine.familia_id, searchProducto, allowedProductIds]);
+    }, [allProductos, newLine.familia_id, allowedProductIds]);
+
+    // 1. Unique Product Names
+    const uniqueProductNames = useMemo(() => {
+        const names = new Set<string>();
+        accessableProductos.forEach(p => names.add(p.nombre));
+        return Array.from(names).sort();
+    }, [accessableProductos]);
+
+    // 2. Available Variantes for selected Name
+    const availableVariantes = useMemo(() => {
+        if (!selectedProductName) return [];
+        const variants = new Map<number, any>();
+        accessableProductos
+            .filter(p => p.nombre === selectedProductName)
+            .forEach(p => {
+                if (p.variante) variants.set(p.variante.id, p.variante);
+            });
+        return Array.from(variants.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
+    }, [accessableProductos, selectedProductName]);
+
+    // 3. Available Tamanos for selected Name + Variety
+    const availableTamanos = useMemo(() => {
+        if (!selectedProductName || !selectedVarianteId) return [];
+        const tamanos = new Map<number, any>();
+        accessableProductos
+            .filter(p => p.nombre === selectedProductName && p.variante_id === selectedVarianteId)
+            .forEach(p => {
+                if (p.tamano) tamanos.set(p.tamano.id, p.tamano);
+            });
+        return Array.from(tamanos.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
+    }, [accessableProductos, selectedProductName, selectedVarianteId]);
+
+    // Effect: Resolve final Product ID when all 3 are selected
+    useEffect(() => {
+        if (selectedProductName && selectedVarianteId && selectedTamanoId) {
+            const match = accessableProductos.find(p =>
+                p.nombre === selectedProductName &&
+                p.variante_id === selectedVarianteId &&
+                p.tamano_id === selectedTamanoId
+            );
+            if (match) {
+                setNewLine(prev => ({ ...prev, producto_id: match.id }));
+            }
+        }
+    }, [selectedProductName, selectedVarianteId, selectedTamanoId, accessableProductos]);
+
+    // Effect: Partial Reset logic
+    // When Familia changes, everything resets (handled by newLine.familia_id change implicitly effectively clearing accessableProductos)
+    // Make sure we clear local state when switching families if needed, OR just rely on UI state.
+
+    // When editing: populate local state from newLine.producto_id
+    useEffect(() => {
+        if (newLine.producto_id) {
+            const p = allProductos.find(prod => prod.id === newLine.producto_id);
+            if (p) {
+                // Only update if different (to avoid loops, though strict equality check simplifies)
+                if (p.nombre !== selectedProductName) setSelectedProductName(p.nombre);
+                if (p.variante_id !== selectedVarianteId) setSelectedVarianteId(p.variante_id);
+                if (p.tamano_id !== selectedTamanoId) setSelectedTamanoId(p.tamano_id);
+            }
+        } else if (!isEditing) {
+            // If we are ADDING and there is no product ID, we might want to clear, 
+            // BUT we don't want to clear if the user is in the middle of selecting logic.
+            // Usually, when 'newLine' is reset (after add), producto_id becomes 0.
+            if (newLine.producto_id === 0 && !selectedProductName && !selectedVarianteId) {
+                // Already cleared or initial
+            }
+        }
+    }, [newLine.producto_id, allProductos, isEditing]);
+
+    // Helper to clear local selection when adding new line
+    useEffect(() => {
+        if (newLine.producto_id === 0 && !isEditing) {
+            // We can check if we need to reset. 
+            // If we just added a line, newLine resets.
+            // We should reset selection state too.
+            // But we need to distinguishes between "Start typing" and "Reset".
+            // Let's rely on the parent clearing newLine.
+        }
+    }, [newLine]);
+
+    const filteredProductos = useMemo(() => {
+        // Keep this strictly for compatibility if used elsewhere, 
+        // OR replace its usage. 
+        // The original code used this for the single Combobox. 
+        // We will replace the Combobox, so this might be obsolete, 
+        // BUT we might want to keep it valid just in case.
+        if (!newLine.familia_id) return [];
+        return accessableProductos.filter(p => {
+            const matchesSearch = p.nombre.toLowerCase().includes(searchProducto.toLowerCase());
+            return matchesSearch;
+        });
+    }, [accessableProductos, searchProducto]);
 
     const selectedProduct = useMemo(() => {
         return allProductos.find(p => p.id === newLine.producto_id) || null;
@@ -201,6 +293,10 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
         const newLines = [...data.lineas];
         const lineWithNames = {
             ...newLine,
+            // Ensure IDs are correct from selected product (critical for Foreign Keys)
+            variante_id: selectedProduct?.variante_id || newLine.variante_id,
+            tamano_id: selectedProduct?.tamano_id || newLine.tamano_id,
+            // Names for UI
             producto_nombre: selectedProduct?.nombre,
             variante_nombre: selectedProduct?.variante?.nombre,
             tamano_nombre: selectedProduct?.tamano?.nombre,
@@ -233,7 +329,8 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
             stems_per_bunch: 0,
             bunches_per_box: 0,
             stems_per_box: 0,
-            empaque_nombre: ""
+            empaque_nombre: "",
+            po: ""
         });
         // We don't need to manually reset search terms anymore as Combobox handles display via 'value'
         // setSearchFamilia(""); 
@@ -280,7 +377,8 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
             stems_per_bunch: 0,
             bunches_per_box: 0,
             stems_per_box: 0,
-            empaque_nombre: ""
+            empaque_nombre: "",
+            po: ""
         });
         setSelectedEmpaqueId(0);
     }
@@ -338,36 +436,73 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
                     </div>
 
 
-                    {/* Fila 2: Producto Detallado */}
-                    <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                    {/* Fila 2: Selección en Cascada */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <Combobox
-                                label={<><span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white text-xs">3</span>Especificación del Producto (Nombre y Variedad)</>}
-                                labelClassName="text-sm font-bold text-black dark:text-white"
-                                placeholder={newLine.familia_id ? "Buscar producto..." : "Primero seleccione una familia"}
-                                disabled={!newLine.familia_id}
-                                options={filteredProductos.map(p => ({
-                                    value: p.id,
-                                    label: p.nombre,
-                                    secondaryLabel: p.descripcion || ""
-                                }))}
-                                value={newLine.producto_id}
-                                onChange={(val) => {
-                                    const pid = Number(val);
-                                    const prod = allProductos.find(p => p.id === pid);
-                                    if (prod) {
-                                        setNewLine(prev => ({
-                                            ...prev,
-                                            producto_id: pid,
-                                            variante_id: prod.variante_id,
-                                            tamano_id: prod.tamano_id,
-                                            producto_nombre: prod.nombre,
-                                            variante_nombre: prod.variante?.nombre,
-                                            tamano_nombre: prod.tamano?.nombre
-                                        }));
-                                    }
-                                }}
-                            />
+                            <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
+                                <span className="mr-2 inline-flex items-center justify-center rounded-full bg-primary h-5 w-5 text-xs text-white">3</span>
+                                Producto
+                            </label>
+                            <div className="relative z-20 bg-transparent dark:bg-form-input">
+                                <select
+                                    className="w-full rounded-md border border-stroke bg-gray-50 py-2 px-4 dark:bg-meta-4 focus:border-primary outline-none text-xs font-bold"
+                                    value={selectedProductName}
+                                    onChange={(e) => {
+                                        setSelectedProductName(e.target.value);
+                                        setSelectedVarianteId(0);
+                                        setSelectedTamanoId(0);
+                                        setNewLine(prev => ({ ...prev, producto_id: 0 }));
+                                    }}
+                                    disabled={!newLine.familia_id}
+                                >
+                                    <option value="">Seleccionar Producto</option>
+                                    {uniqueProductNames.map((name, i) => (
+                                        <option key={i} value={name}>{name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
+                                Variedad
+                            </label>
+                            <div className="relative z-20 bg-transparent dark:bg-form-input">
+                                <select
+                                    className="w-full rounded-md border border-stroke bg-gray-50 py-2 px-4 dark:bg-meta-4 focus:border-primary outline-none text-xs font-bold"
+                                    value={selectedVarianteId}
+                                    onChange={(e) => {
+                                        setSelectedVarianteId(Number(e.target.value));
+                                        setSelectedTamanoId(0);
+                                        setNewLine(prev => ({ ...prev, producto_id: 0 }));
+                                    }}
+                                    disabled={!selectedProductName}
+                                >
+                                    <option value={0}>Seleccionar Variedad</option>
+                                    {availableVariantes.map((v) => (
+                                        <option key={v.id} value={v.id}>{v.nombre}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
+                                Tamaño
+                            </label>
+                            <div className="relative z-20 bg-transparent dark:bg-form-input">
+                                <select
+                                    className="w-full rounded-md border border-stroke bg-gray-50 py-2 px-4 dark:bg-meta-4 focus:border-primary outline-none text-xs font-bold"
+                                    value={selectedTamanoId}
+                                    onChange={(e) => {
+                                        setSelectedTamanoId(Number(e.target.value));
+                                    }}
+                                    disabled={!selectedVarianteId}
+                                >
+                                    <option value={0}>Seleccionar Tamaño</option>
+                                    {availableTamanos.map((t) => (
+                                        <option key={t.id} value={t.id}>{t.nombre}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -438,9 +573,24 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
 
                     {/* Fila 4: Detalles de Bultos y Precios */}
                     {/* Fila 4: Detalles de Bultos y Precios - IMPROVED LAYOUT */}
-                    <div className="grid grid-cols-2 md:grid-cols-10 gap-6 pt-4">
+                    <div className="grid grid-cols-2 md:grid-cols-12 gap-6 pt-4">
                         {/* Empaque */}
+
                         <div className="col-span-2 md:col-span-2">
+                            <label className="mb-2 block text-xs font-black text-gray-500 uppercase tracking-wider">PO</label>
+                            <input
+                                type="text"
+                                className="w-full rounded-lg border-2 border-stroke bg-white py-3 px-4 dark:bg-boxdark focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none text-xl font-black text-center text-black dark:text-white transition-all shadow-sm"
+                                value={newLine.po || ""}
+                                onChange={(e) => setNewLine({ ...newLine, po: e.target.value })}
+                                placeholder="PO#"
+                            />
+                        </div>
+
+                        {/* Empaque  (Ya estaba el div wrapper, lo reutilizamos para Cajas o lo dividimos) */}
+                        <div className="col-span-2 md:col-span-2">
+
+
                             <label className="mb-2 block text-xs font-black text-primary uppercase tracking-wider">Cajas (Bultos)</label>
                             <input
                                 type="number"
@@ -452,22 +602,22 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
                             />
                         </div>
                         <div className="col-span-1 md:col-span-1">
-                            <label className="mb-2 block text-[10px] font-bold text-gray-500 uppercase tracking-tighter">Stems/Bun</label>
+                            <label className="mb-2 block text-xs font-bold text-gray-500 uppercase tracking-tighter">Stems/Bun</label>
                             <input
                                 type="number"
                                 readOnly
                                 tabIndex={-1}
-                                className="w-full rounded-lg border border-stroke bg-gray-100 py-3 px-2 dark:bg-meta-4 outline-none text-sm text-center text-gray-500 cursor-not-allowed font-medium"
+                                className="w-full rounded-lg border-2 border-primary/30 bg-primary/5 py-3 px-2 dark:bg-meta-4 outline-none text-lg font-bold text-center text-primary cursor-not-allowed"
                                 value={newLine.stems_per_bunch}
                             />
                         </div>
                         <div className="col-span-1 md:col-span-1">
-                            <label className="mb-2 block text-[10px] font-bold text-gray-500 uppercase tracking-tighter">Bun/Box</label>
+                            <label className="mb-2 block text-xs font-bold text-gray-500 uppercase tracking-tighter">Bun/Box</label>
                             <input
                                 type="number"
                                 readOnly
                                 tabIndex={-1}
-                                className="w-full rounded-lg border border-stroke bg-gray-100 py-3 px-2 dark:bg-meta-4 outline-none text-sm text-center text-gray-500 cursor-not-allowed font-medium"
+                                className="w-full rounded-lg border-2 border-primary/30 bg-primary/5 py-3 px-2 dark:bg-meta-4 outline-none text-lg font-bold text-center text-primary cursor-not-allowed"
                                 value={newLine.bunches_per_box}
                             />
                         </div>
@@ -487,27 +637,27 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
                                 />
                             </div>
                         </div>
-                        <div className="col-span-1 md:col-span-1">
+                        <div className="col-span-2 md:col-span-2">
                             <label className="mb-2 block text-xs font-black text-gray-500 uppercase tracking-wider">P. Prov</label>
                             <div className="relative group">
-                                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{monedaSimbolo}</span>
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg group-focus-within:text-primary transition-colors">{monedaSimbolo}</span>
                                 <input
                                     type="number"
                                     step="0.01"
-                                    className="w-full rounded-lg border border-stroke bg-gray-50 py-3 pl-6 pr-2 dark:bg-meta-4 outline-none text-sm font-bold text-gray-600 dark:text-gray-300 transition-all focus:bg-white focus:border-primary shadow-sm"
+                                    className="w-full rounded-lg border-2 border-stroke bg-white py-3 pl-8 pr-4 dark:bg-boxdark focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none text-xl font-black text-gray-700 dark:text-white transition-all shadow-sm"
                                     value={newLine.precio_proveedor}
                                     onChange={(e) => setNewLine({ ...newLine, precio_proveedor: Number(e.target.value) })}
                                     placeholder="0.00"
                                 />
                             </div>
                         </div>
-                        <div className="col-span-1 md:col-span-1">
-                            <label className="mb-2 block text-[10px] font-bold text-gray-500 uppercase tracking-tighter">IVA %</label>
+                        <div className="col-span-2 md:col-span-2">
+                            <label className="mb-2 block text-xs font-bold text-gray-500 uppercase tracking-tighter">IVA %</label>
                             <input
                                 type="number"
                                 readOnly
                                 tabIndex={-1}
-                                className="w-full rounded-lg border border-stroke bg-gray-100 py-3 px-2 dark:bg-meta-4 outline-none text-sm text-center text-gray-500 cursor-not-allowed font-medium"
+                                className="w-full rounded-lg border-2 border-primary/30 bg-primary/5 py-3 px-2 dark:bg-meta-4 outline-none text-lg font-bold text-center text-primary cursor-not-allowed"
                                 value={newLine.impuesto}
                             />
                         </div>
@@ -553,7 +703,7 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
                             <div className="p-3 bg-white dark:bg-boxdark rounded-lg shadow-sm border border-stroke dark:border-strokedark">
                                 <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Producto</label>
                                 <div className="text-sm font-bold text-black dark:text-white truncate">
-                                    {selectedProduct?.nombre || "—"}
+                                    {selectedProduct?.nombre || "—"} {selectedProduct?.tamano?.nombre ? `- ${selectedProduct.tamano.nombre}` : ""}
                                 </div>
                                 <div className="text-[10px] text-gray-500 truncate">{selectedProduct?.variante?.nombre}</div>
                             </div>
@@ -564,6 +714,7 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
                                 <div className="text-sm font-black text-black dark:text-white">
                                     {newLine.cajas} <span className="text-[10px] font-normal text-gray-500">Cajas</span>
                                 </div>
+                                <div className="text-[10px] text-gray-500 font-medium truncate">{newLine.empaque_nombre}</div>
                                 <div className="text-[10px] text-gray-500">{(newLine.cantidad || 0).toLocaleString()} Tallos</div>
                             </div>
 
@@ -587,6 +738,18 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
                         </div>
 
                         <div className="flex justify-end gap-4 w-full">
+                            {selectedProduct && selectedProduct.variante.nombre.toUpperCase().includes("ASSORTED") && (
+                                <button
+                                    onClick={() => setIsAssortedModalOpen(true)}
+                                    className={`px-4 py-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 border-2 transition-all uppercase tracking-wider ${newLine.assorted_config && newLine.assorted_config.length > 0
+                                        ? 'bg-success/10 text-success border-success'
+                                        : 'bg-warning/10 text-warning border-warning animate-pulse'
+                                        }`}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                                    {newLine.assorted_config && newLine.assorted_config.length > 0 ? 'Surtido Configurado' : 'Configurar Surtido'}
+                                </button>
+                            )}
                             {isEditing !== null ? (
                                 <>
                                     <button
@@ -622,12 +785,14 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
                     <thead>
                         <tr className="bg-gray-2 text-left dark:bg-meta-4 shadow-sm border-b border-stroke dark:border-strokedark">
                             <th className="py-3 px-4 text-xs font-bold uppercase text-black dark:text-white">Prov.</th>
-                            <th className="py-3 px-4 text-xs font-bold uppercase text-black dark:text-white">Producto / Variedad / Tamaño / Empaque</th>
+                            <th className="py-3 px-4 text-xs font-bold uppercase text-black dark:text-white">Producto</th>
+                            <th className="py-3 px-2 text-xs font-bold uppercase text-black dark:text-white">Variedad</th>
+                            <th className="py-3 px-2 text-xs font-bold uppercase text-black dark:text-white">Tamaño</th>
                             <th className="py-3 px-1 text-xs font-bold uppercase text-black dark:text-white text-center">Cjs.</th>
                             <th className="py-3 px-1 text-xs font-bold uppercase text-black dark:text-white text-center">SxB</th>
                             <th className="py-3 px-1 text-xs font-bold uppercase text-black dark:text-white text-center">BxB</th>
                             <th className="py-3 px-1 text-xs font-bold uppercase text-black dark:text-white text-center">St x Bx</th>
-                            <th className="py-3 px-1 text-xs font-bold uppercase text-black dark:text-white text-center">T. Stems</th>
+                            <th className="py-3 px-1 text-xs font-bold uppercase text-black dark:text-white text-center">Total St.</th>
                             <th className="py-3 px-4 text-xs font-bold uppercase text-black dark:text-white text-right">P.U.</th>
                             <th className="py-3 px-1 text-xs font-bold uppercase text-black dark:text-white text-center">IVA</th>
                             <th className="py-3 px-1 text-xs font-bold uppercase text-black dark:text-white text-center">Exo</th>
@@ -643,16 +808,33 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
                             const netTaxRate = Math.max(0, (linea.impuesto || 0) - (linea.exoneracion || 0));
                             const lineTotal = lineSubtotal * (1 + netTaxRate / 100);
 
+                            const isAssorted = (linea.variante_nombre || prod?.variante?.nombre || "").toUpperCase().includes("ASSORTED");
+                            const isAssortedMissingConfig = isAssorted && (!linea.assorted_config || linea.assorted_config.length === 0);
+
                             return (
-                                <tr key={idx} className={`border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-boxdark-2 transition-colors ${isEditing === idx ? 'bg-blue-50 dark:bg-meta-4' : ''}`}>
+                                <tr key={idx} className={`border-b border-stroke dark:border-strokedark transition-colors 
+                                    ${isEditing === idx ? 'bg-blue-50 dark:bg-meta-4' : ''}
+                                    ${isAssortedMissingConfig ? 'bg-red-50 dark:bg-red-900/10 border-l-4 border-l-danger' : 'hover:bg-gray-50 dark:hover:bg-boxdark-2'}
+                                `}>
                                     <td className="py-4 px-4 text-xs font-medium">{prov?.nombre || "N/A"}</td>
-                                    <td className="py-4 px-4">
-                                        <div className="text-xs font-bold uppercase text-black dark:text-white">
-                                            {linea.producto_nombre || prod?.nombre}
-                                        </div>
-                                        <div className="text-[10px] text-gray-500 mt-1 uppercase">
-                                            {linea.variante_nombre || prod?.variante?.nombre} / {linea.tamano_nombre || prod?.tamano?.nombre} {linea.empaque_nombre ? `/ ${linea.empaque_nombre}` : ""}
-                                        </div>
+                                    <td className="py-4 px-4 text-xs font-bold uppercase text-black dark:text-white">
+                                        {linea.producto_nombre || prod?.nombre}
+                                    </td>
+                                    <td className="py-4 px-2 text-xs text-black dark:text-white uppercase text-center flex items-center justify-center gap-1">
+                                        {linea.variante_nombre || prod?.variante?.nombre}
+                                        {isAssortedMissingConfig && (
+                                            <span className="text-danger animate-pulse" title="Surtido no configurado">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                            </span>
+                                        )}
+                                        {!isAssortedMissingConfig && isAssorted && (
+                                            <span className="text-success" title="Surtido configurado">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td className="py-4 px-2 text-xs text-black dark:text-white uppercase text-center">
+                                        {linea.tamano_nombre || prod?.tamano?.nombre} {linea.empaque_nombre ? `/ ${linea.empaque_nombre}` : ""}
                                     </td>
                                     <td className="py-4 px-1 text-xs text-center font-semibold">{linea.cajas}</td>
                                     <td className="py-4 px-1 text-xs text-center text-gray-600 dark:text-gray-400">{linea.stems_per_bunch}</td>
@@ -779,9 +961,17 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
                         </div>
                     )}
                 </div>
+                {selectedProduct && (
+                    <AssortedModal
+                        isOpen={isAssortedModalOpen}
+                        onClose={() => setIsAssortedModalOpen(false)}
+                        variantesDisponibles={availableVariantes}
+                        initialConfig={newLine.assorted_config}
+                        totalTarget={newLine.cantidad || 0}
+                        onSave={(config) => setNewLine(prev => ({ ...prev, assorted_config: config }))}
+                    />
+                )}
             </div>
         </div>
-
-
     );
 }
