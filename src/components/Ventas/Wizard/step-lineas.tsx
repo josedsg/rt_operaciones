@@ -591,7 +591,7 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
                         <div className="col-span-2 md:col-span-2">
 
 
-                            <label className="mb-2 block text-xs font-black text-primary uppercase tracking-wider">Cajas (Bultos)</label>
+                            <label className="mb-2 block text-xs font-black text-primary uppercase tracking-wider">Cajas</label>
                             <input
                                 type="number"
                                 className="w-full rounded-lg border-2 border-stroke bg-white py-3 px-4 dark:bg-boxdark focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none text-xl font-black text-center text-black dark:text-white transition-all shadow-sm"

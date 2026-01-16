@@ -14,8 +14,9 @@ export function StepEncabezado({ data, updateData }: StepEncabezadoProps) {
     const [clientes, setClientes] = useState<Cliente[]>([]);
 
     useEffect(() => {
-        getClientesAction().then(res => {
-            setClientes(res);
+        // Fetch all clients (large limit) for the dropdown
+        getClientesAction(1, 1000).then(res => {
+            setClientes(res.data);
         });
     }, []);
 

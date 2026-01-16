@@ -1,90 +1,119 @@
 "use client";
 
-import { Cliente } from "@/types/cliente";
 import { useEffect, useState } from "react";
-import { ClienteCard } from "./cliente-card";
-import { getClientes } from "@/services/clientes";
 import Link from "next/link";
-import { SearchIcon } from "@/assets/icons"; // Assuming you have an icon, or use an svg inline
+import toast from "react-hot-toast";
+import { getClientesAction, deleteClienteAction, getTiposClienteAction } from "@/actions/clientes";
+import { ConfirmModal } from "@/components/Common/confirm-modal";
 
 export function GridCliente() {
-    const [clientes, setClientes] = useState<Cliente[]>([]);
-    const [filteredClientes, setFilteredClientes] = useState<Cliente[]>([]);
-    const [searchTerm, setSearchTerm] = useState("");
+    const [clientes, setClientes] = useState<any[]>([]);
+    const [tiposCliente, setTiposCliente] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [filters, setFilters] = useState({
+        nombre: "",
+        tipo_cliente: "TODOS"
+    });
+
+    // Pagination
+    const [page, setPage] = useState(1);
+    const [total, setTotal] = useState(0);
+    const limit = 20;
+
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        id: 0
+    });
 
     useEffect(() => {
-        const fetchClientes = async () => {
-            try {
-                const data = await getClientes();
-                setClientes(data);
-                setFilteredClientes(data);
-            } catch (error) {
-                console.error("Error fetching clientes:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchClientes();
+        // Load Tipos de Cliente for filter
+        getTiposClienteAction().then(setTiposCliente);
     }, []);
 
+    const fetchClientes = async () => {
+        setLoading(true);
+        try {
+            const res = await getClientesAction(page, limit, filters);
+            setClientes(res.data);
+            setTotal(res.total);
+        } catch (error) {
+            console.error(error);
+            toast.error("Error al cargar clientes");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const results = clientes.filter(
-            (cliente) =>
-                cliente.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                (cliente.nombre_comercial || "")
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase()),
-        );
-        setFilteredClientes(results);
-    }, [searchTerm, clientes]);
+        const timer = setTimeout(() => {
+            fetchClientes();
+        }, 300); // 300ms debounce
+        return () => clearTimeout(timer);
+    }, [filters, page]);
+
+    const handleDelete = async () => {
+        try {
+            await deleteClienteAction(confirmModal.id);
+            toast.success("Cliente eliminado");
+            setConfirmModal({ isOpen: false, id: 0 });
+            fetchClientes();
+        } catch (error) {
+            toast.error("Error al eliminar cliente");
+        }
+    };
+
+    const totalPages = Math.ceil(total / limit);
 
     return (
-        <div className="flex flex-col gap-6">
-            <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-                {/* Search Bar */}
-                <div className="relative w-full max-w-md">
-                    <div className="relative">
-                        <input
-                            type="text"
-                            placeholder="Buscar cliente..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-12 pr-6 outline-none focus:border-primary focus-visible:shadow-none dark:border-stroke-dark dark:bg-dark-2 dark:text-white dark:focus-visible:border-primary"
-                        />
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2">
-                            <svg
-                                className="fill-current text-bodydark2 dark:text-white"
-                                width="20"
-                                height="20"
-                                viewBox="0 0 20 20"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <path
-                                    fillRule="evenodd"
-                                    clipRule="evenodd"
-                                    d="M9.16666 3.33332C5.94504 3.33332 3.33332 5.94504 3.33332 9.16666C3.33332 12.3883 5.94504 15 9.16666 15C12.3883 15 15 12.3883 15 9.16666C15 5.94504 12.3883 3.33332 9.16666 3.33332ZM1.66666 9.16666C1.66666 5.02452 5.02452 1.66666 9.16666 1.66666C13.3088 1.66666 16.6667 5.02452 16.6667 9.16666C16.6667 13.3088 13.3088 16.6667 9.16666 16.6667C5.02452 16.6667 1.66666 13.3088 1.66666 9.16666Z"
-                                    fill=""
-                                />
-                                <path
-                                    fillRule="evenodd"
-                                    clipRule="evenodd"
-                                    d="M13.2857 13.2857C13.6112 12.9603 14.1388 12.9603 14.4642 13.2857L18.0892 16.9107C18.4147 17.2362 18.4147 17.7638 18.0892 18.0892C17.7638 18.4147 17.2362 18.4147 16.9107 18.0892L13.2857 14.4642C12.9603 14.1388 12.9603 13.6112 13.2857 13.2857Z"
-                                    fill=""
-                                />
-                            </svg>
-                        </span>
-                    </div>
-                </div>
-
+        <div>
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <h2 className="text-title-md2 font-semibold text-black dark:text-white">
+                    Clientes
+                </h2>
                 <Link
                     href="/clientes/nuevo"
-                    className="inline-flex items-center justify-center rounded-lg bg-primary px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+                    className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
                 >
                     Agregar Cliente
                 </Link>
+            </div>
+
+            <div className="flex flex-col gap-4 bg-white dark:bg-boxdark p-6 rounded-lg border border-stroke dark:border-strokedark shadow-1 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                            Buscar (Nombre / Comercial / ID)
+                        </label>
+                        <input
+                            type="text"
+                            placeholder="Buscar..."
+                            className="w-full rounded border border-stroke bg-transparent py-2 px-4 outline-none focus:border-primary dark:border-strokedark"
+                            value={filters.nombre}
+                            onChange={(e) => {
+                                setFilters(prev => ({ ...prev, nombre: e.target.value }));
+                                setPage(1); // Reset page on filter change
+                            }}
+                        />
+                    </div>
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                            Tipo de Cliente
+                        </label>
+                        <select
+                            className="w-full rounded border border-stroke bg-transparent py-2 px-4 outline-none focus:border-primary dark:border-strokedark"
+                            value={filters.tipo_cliente}
+                            onChange={(e) => {
+                                setFilters(prev => ({ ...prev, tipo_cliente: e.target.value }));
+                                setPage(1);
+                            }}
+                        >
+                            <option value="TODOS">Todos</option>
+                            {tiposCliente.map(t => (
+                                <option key={t.id} value={t.id}>{t.nombre}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
             </div>
 
             {loading ? (
@@ -92,17 +121,94 @@ export function GridCliente() {
                     <div className="h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent"></div>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-                    {filteredClientes.map((cliente) => (
-                        <ClienteCard key={cliente.id} cliente={cliente} />
-                    ))}
-                    {filteredClientes.length === 0 && (
-                        <div className="col-span-full py-10 text-center text-dark-6">
-                            No se encontraron clientes.
+                <div className="bg-white dark:bg-boxdark rounded-sm border border-stroke dark:border-strokedark shadow-default overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full table-auto">
+                            <thead>
+                                <tr className="bg-gray-2 text-left dark:bg-meta-4">
+                                    <th className="py-4 px-4 font-medium text-black dark:text-white">ID</th>
+                                    <th className="py-4 px-4 font-medium text-black dark:text-white">Nombre / Comercial</th>
+                                    <th className="py-4 px-4 font-medium text-black dark:text-white">Identificación</th>
+                                    <th className="py-4 px-4 font-medium text-black dark:text-white">Tipo</th>
+                                    <th className="py-4 px-4 font-medium text-black dark:text-white">Ubicación</th>
+                                    <th className="py-4 px-4 font-medium text-black dark:text-white">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {clientes.map((cliente) => (
+                                    <tr key={cliente.id} className="border-t border-stroke dark:border-strokedark hover:bg-gray-1 dark:hover:bg-meta-4">
+                                        <td className="py-5 px-4 font-medium text-black dark:text-white text-xs">{cliente.id}</td>
+                                        <td className="py-5 px-4">
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold text-black dark:text-white text-sm">{cliente.nombre}</span>
+                                                {cliente.nombre_comercial && (
+                                                    <span className="text-xs text-gray-500">{cliente.nombre_comercial}</span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="py-5 px-4 text-xs font-medium">
+                                            {cliente.tipo_identificacion?.codigo} - {cliente.identificacion}
+                                        </td>
+                                        <td className="py-5 px-4 text-xs font-medium">
+                                            <span className="inline-block rounded bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
+                                                {cliente.tipo_cliente?.nombre}
+                                            </span>
+                                        </td>
+                                        <td className="py-5 px-4 text-xs">
+                                            {cliente.provincia?.nombre}, {cliente.pais?.nombre}
+                                        </td>
+                                        <td className="py-5 px-4">
+                                            <div className="flex items-center space-x-3.5">
+                                                <Link href={`/clientes/${cliente.id}/editar`} className="hover:text-primary" title="Editar">
+                                                    ✏️
+                                                </Link>
+                                                <button
+                                                    onClick={() => setConfirmModal({ isOpen: true, id: cliente.id })}
+                                                    className="hover:text-meta-1"
+                                                    title="Eliminar"
+                                                >
+                                                    🗑️
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                        <div className="flex justify-between items-center p-4 border-t border-stroke dark:border-strokedark">
+                            <button
+                                disabled={page === 1}
+                                onClick={() => setPage(p => Math.max(1, p - 1))}
+                                className="px-4 py-2 text-sm font-medium text-black bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
+                            >
+                                Anterior
+                            </button>
+                            <span className="text-sm text-gray-600">
+                                Página {page} de {totalPages}
+                            </span>
+                            <button
+                                disabled={page === totalPages}
+                                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                className="px-4 py-2 text-sm font-medium text-black bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
+                            >
+                                Siguiente
+                            </button>
                         </div>
                     )}
                 </div>
             )}
+
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal({ isOpen: false, id: 0 })}
+                onConfirm={handleDelete}
+                title="Eliminar Cliente"
+                message="¿Estás seguro? Esta acción no se puede deshacer."
+                type="danger"
+            />
         </div>
     );
 }

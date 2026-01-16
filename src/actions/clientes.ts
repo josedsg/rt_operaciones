@@ -45,24 +45,58 @@ export async function getDistritosAction(cantonId: number) {
 
 // --- CRUD ---
 
-export async function getClientesAction() {
+export async function getClientesAction(
+    page = 1,
+    limit = 20,
+    filters = { nombre: "", tipo_cliente: "" }
+) {
     try {
-        const clientes = await prisma.cliente.findMany({
-            orderBy: { id: "asc" },
-            include: {
-                tipo_cliente: true,
-                tipo_identificacion: true,
-                terminos_pago: true,
-                pais: true,
-                provincia: true,
-                canton: true,
-                distrito: true,
-            },
-        });
-        return clientes;
+        const skip = (page - 1) * limit;
+
+        const whereClause: any = {};
+
+        if (filters.nombre) {
+            whereClause.OR = [
+                { nombre: { contains: filters.nombre, mode: "insensitive" } },
+                { nombre_comercial: { contains: filters.nombre, mode: "insensitive" } },
+                // Si tuviéramos un campo código explícito idealmente filtraríamos por él también
+                // { codigo: { contains: filters.nombre, mode: "insensitive" } } 
+            ];
+
+            // Intento de búsqueda por ID si es numérico
+            const idSearch = Number(filters.nombre);
+            if (!isNaN(idSearch)) {
+                whereClause.OR.push({ id: idSearch });
+            }
+        }
+
+        if (filters.tipo_cliente && filters.tipo_cliente !== "TODOS") {
+            whereClause.tipo_cliente_id = Number(filters.tipo_cliente);
+        }
+
+        const [clientes, total] = await Promise.all([
+            prisma.cliente.findMany({
+                where: whereClause,
+                skip,
+                take: limit,
+                orderBy: { id: "desc" },
+                include: {
+                    tipo_cliente: true,
+                    tipo_identificacion: true,
+                    terminos_pago: true,
+                    pais: true,
+                    provincia: true,
+                    canton: true,
+                    distrito: true,
+                },
+            }),
+            prisma.cliente.count({ where: whereClause })
+        ]);
+
+        return { data: clientes, total };
     } catch (error) {
         console.error("Error al obtener clientes desde Prisma:", error);
-        return [];
+        return { data: [], total: 0 };
     }
 }
 
@@ -110,6 +144,17 @@ export async function createClienteAction(data: any) {
     } catch (error) {
         console.error("Error al crear cliente:", error);
         throw new Error("No se pudo crear el cliente");
+    }
+}
+
+export async function deleteClienteAction(id: number) {
+    try {
+        await prisma.cliente.delete({ where: { id } });
+        revalidatePath("/clientes");
+        return { success: true };
+    } catch (error) {
+        console.error("Error al eliminar cliente:", error);
+        throw new Error("No se pudo eliminar el cliente");
     }
 }
 
