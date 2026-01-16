@@ -1,0 +1,373 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model TipoCliente {
+  id                 Int       @id @default(autoincrement())
+  nombre             String
+  descripcion        String?   @db.Text
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  clientes           Cliente[]
+
+  @@map("tipos_clientes")
+}
+
+model TipoIdentificacion {
+  id                 Int       @id @default(autoincrement())
+  nombre             String
+  descripcion        String?   @db.Text
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  clientes           Cliente[]
+
+  @@map("tipos_identificaciones")
+}
+
+model TerminosPago {
+  id                 Int       @id @default(autoincrement())
+  nombre             String
+  descripcion        String?   @db.Text
+  dias               Int       @default(0) // 'cant' in user request, standardized to dias
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  clientes           Cliente[]
+
+  @@map("terminos_pago")
+}
+
+model Pais {
+  id                 Int       @id @default(autoincrement())
+  nombre             String
+  descripcion        String?   @db.Text
+  codigo             String?
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  provincias         Provincia[]
+  clientes           Cliente[] // Can link directly or implicit through address
+
+  @@map("paises")
+}
+
+model Provincia {
+  id                 Int       @id @default(autoincrement())
+  pais_id            Int
+  pais               Pais      @relation(fields: [pais_id], references: [id])
+  nombre             String
+  descripcion        String?   @db.Text
+  codigo             String?
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  cantones           Canton[]
+  clientes           Cliente[]
+
+  @@map("provincias")
+}
+
+model Canton {
+  id                 Int       @id @default(autoincrement())
+  provincia_id       Int
+  provincia          Provincia @relation(fields: [provincia_id], references: [id])
+  nombre             String
+  descripcion        String?   @db.Text
+  codigo             String?
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  distritos          Distrito[]
+  clientes           Cliente[]
+
+  @@map("cantones")
+}
+
+model Distrito {
+  id                 Int       @id @default(autoincrement())
+  canton_id          Int
+  canton             Canton    @relation(fields: [canton_id], references: [id])
+  nombre             String
+  descripcion        String?   @db.Text
+  codigo             String?
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  clientes           Cliente[]
+
+  @@map("distritos")
+}
+
+model Cliente {
+  id                 Int       @id @default(autoincrement())
+  
+  tipo_identificacion_id Int
+  tipo_identificacion TipoIdentificacion @relation(fields: [tipo_identificacion_id], references: [id])
+  
+  identificacion     String
+  
+  tipo_cliente_id    Int
+  tipo_cliente       TipoCliente @relation(fields: [tipo_cliente_id], references: [id])
+  
+  nombre             String
+  nombre_comercial   String?
+  email_notificacion String?
+  telefono           String?
+  sitio_web          String?
+  
+  pais_id            Int
+  pais               Pais      @relation(fields: [pais_id], references: [id])
+  
+  provincia_id       Int?
+  provincia          Provincia? @relation(fields: [provincia_id], references: [id])
+  
+  canton_id          Int?
+  canton             Canton?    @relation(fields: [canton_id], references: [id])
+  
+  distrito_id        Int?
+  distrito           Distrito?  @relation(fields: [distrito_id], references: [id])
+  
+  direccion          String?
+  
+  terminos_pago_id   Int
+  terminos_pago      TerminosPago @relation(fields: [terminos_pago_id], references: [id])
+  
+  latitud            String?
+  longitud           String?
+  
+  // Facturación Electrónica
+  tipo_facturacion   String?   @default("GRAVADO") // GRAVADO | EXONERADO
+  num_documento_exoneracion String?
+  fecha_vencimiento_exoneracion DateTime? @db.Date
+  
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  pedidos            PedidoVenta[]
+
+  @@map("clientes")
+}
+
+model Grupo {
+  id                 Int       @id @default(autoincrement())
+  nombre             String
+  descripcion        String    @db.Text
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  familias           Familia[]
+
+  @@map("grupos")
+}
+
+model Familia {
+  id                 Int       @id @default(autoincrement())
+  nombre_cientifico  String
+  descripcion        String    @db.Text
+  grupo_id           Int
+  grupo              Grupo     @relation(fields: [grupo_id], references: [id])
+  codigo_cabys       String?
+  partida_arancelaria String?
+  foto               String?
+  ficha_tecnica      String?
+  configuraciones    ConfiguracionPermitida[]
+  productos_maestros ProductoMaestro[]
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  lineas_venta       LineaPedidoVenta[]
+
+  @@map("familias")
+}
+
+model Variante {
+  id                 Int       @id @default(autoincrement())
+  nombre             String
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  configuraciones    ConfiguracionPermitida[]
+  productos_maestros ProductoMaestro[]
+  lineas_venta       LineaPedidoVenta[]
+
+  @@map("variantes")
+}
+
+model Tamano {
+  id                 Int       @id @default(autoincrement())
+  nombre             String
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  configuraciones    ConfiguracionPermitida[]
+  productos_maestros ProductoMaestro[]
+  lineas_venta       LineaPedidoVenta[]
+
+  @@map("tamanos")
+}
+
+model ConfiguracionPermitida {
+  id                 Int       @id @default(autoincrement())
+  familia_id         Int
+  familia            Familia   @relation(fields: [familia_id], references: [id], onDelete: Cascade)
+  variante_id        Int?
+  variante           Variante? @relation(fields: [variante_id], references: [id])
+  tamano_id          Int?
+  tamano             Tamano?   @relation(fields: [tamano_id], references: [id])
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+
+  @@map("configuraciones_permitidas")
+}
+
+model ProductoMaestro {
+  id                 Int       @id @default(autoincrement())
+  nombre             String
+  descripcion        String?   @db.Text
+  familia_id         Int
+  familia            Familia   @relation(fields: [familia_id], references: [id])
+  variante_id        Int
+  variante           Variante  @relation(fields: [variante_id], references: [id])
+  tamano_id          Int
+  tamano             Tamano    @relation(fields: [tamano_id], references: [id])
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  lineas_venta       LineaPedidoVenta[]
+  productos_proveedores ProductoProveedor[]
+
+  @@map("productos_maestros")
+}
+
+model Proveedor {
+  id                 Int       @id @default(autoincrement())
+  nombre             String
+  codigo             String?
+  identificacion     String?
+  contacto           String?
+  email              String?
+  telefono           String?
+  direccion          String?   @db.Text
+  es_principal       Boolean   @default(false)
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  lineas_venta       LineaPedidoVenta[]
+  productos_proveedores ProductoProveedor[]
+  
+  @@map("proveedores")
+}
+
+model PedidoVenta {
+  id                 Int       @id @default(autoincrement())
+  codigo             String    @unique // PV-######
+  descripcion        String?   @db.Text
+  cliente_id         Int
+  cliente            Cliente   @relation(fields: [cliente_id], references: [id])
+  awd                String?
+  moneda             String?   @default("USD") // 'USD' | 'CRC'
+  fecha_pedido       DateTime  @db.Date
+  subtotal           Float     @default(0)
+  impuestos          Float     @default(0)
+  exonerado          Float     @default(0)
+  total              Float     @default(0)
+  estado             String    @default("BORRADOR")
+  
+  // Invoice Details
+  numero_factura     String?
+  pdf_factura        String?
+  xml_envio          String?
+  xml_respuesta      String?
+  estado_factura     String?   @default("PENDIENTE") // PENDIENTE, ENVIADO, ACEPTADO, RECHAZADO
+  
+  lineas             LineaPedidoVenta[]
+  
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+
+  @@map("pedidos_ventas")
+}
+
+model LineaPedidoVenta {
+  id                 Int       @id @default(autoincrement())
+  pedido_id          Int
+  pedido             PedidoVenta @relation(fields: [pedido_id], references: [id], onDelete: Cascade)
+  
+  familia_id         Int
+  familia            Familia   @relation(fields: [familia_id], references: [id])
+  producto_id        Int
+  producto           ProductoMaestro @relation(fields: [producto_id], references: [id])
+  variante_id        Int
+  variante           Variante  @relation(fields: [variante_id], references: [id])
+  tamano_id          Int
+  tamano             Tamano    @relation(fields: [tamano_id], references: [id])
+  
+  proveedor_id       Int?
+  proveedor          Proveedor? @relation(fields: [proveedor_id], references: [id])
+  
+  po                 String?
+  cajas              Int       @default(0)
+  stems_per_bunch    Int       @default(0)
+  bunches_per_box    Int       @default(0)
+  stems_per_box      Int       @default(0)
+  cantidad           Int       @default(0)
+  
+  precio_unitario    Float     @default(0)
+  precio_proveedor   Float     @default(0)
+  impuesto           Float     @default(0)
+  exoneracion        Float     @default(0)
+  subtotal           Float     @default(0)
+  total              Float     @default(0)
+  
+  descripcion        String?   @db.Text
+  awd                String?
+  especificaciones   String?   @db.Text
+  
+  fecha_pedido       DateTime? @db.Date
+  
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+
+  @@map("lineas_pedidos_ventas")
+}
+
+model ProductoProveedor {
+  id                 Int       @id @default(autoincrement())
+  producto_id        Int
+  producto           ProductoMaestro @relation(fields: [producto_id], references: [id])
+  proveedor_id       Int
+  proveedor          Proveedor       @relation(fields: [proveedor_id], references: [id])
+  
+  precio_referencia  Float?    @default(0)
+  codigo_proveedor   String?
+  
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+
+  @@unique([producto_id, proveedor_id])
+  @@map("productos_proveedores")
+}
+
+model TipoEmpaque {
+  id                 Int       @id @default(autoincrement())
+  nombre             String
+  descripcion        String?   @db.Text
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  empaques           Empaque[]
+
+  @@map("tipos_empaques")
+}
+
+model Empaque {
+  id                 Int       @id @default(autoincrement())
+  nombre             String
+  descripcion        String?   @db.Text
+  sxb                Int
+  bxb                Int
+  st_x_bx            Int
+  
+  tipo_empaque_id    Int?
+  tipo_empaque       TipoEmpaque? @relation(fields: [tipo_empaque_id], references: [id])
+  
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+
+  @@map("empaques")
+}

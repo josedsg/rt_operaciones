@@ -1,0 +1,4 @@
+"id","Tipo_Identificacion","identificacion","Tipo_cliente","Nombre","Nombre_Comercial","email_notificacion","Telefono","sitio_web","Pais","Provincia","Canton","Distrito","Direccion","Terminos_pago","Latitud","Longitud","fecha_creacion","fecha_modificacion"
+1,1,"",1,"Jose David Solis","Jose David Solis","josedsg@gmail.com","83561650","www.neosyscr.com",0,0,0,0,"ALAJUELA ZARCERO
+ZARCERO",0,"","",NULL,NULL
+2,1,"",1,"Bella Flowers","Bella Flowers"," lrodriguez@bella.co"," + 305-900-3793","https://www.bellaflo",0,0,0,0,"",30,"","",NULL,NULL
