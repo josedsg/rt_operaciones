@@ -14,6 +14,7 @@ export default function VentasPage() {
         cliente: "",
         fechaInicio: "",
         fechaFin: "",
+        exportacionId: "",
         estado: "BORRADOR"
     });
 
@@ -113,7 +114,7 @@ export default function VentasPage() {
             </div>
 
             <div className="flex flex-col gap-4 bg-white dark:bg-boxdark p-6 rounded-lg border border-stroke dark:border-strokedark shadow-1 mb-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
                     <div>
                         <label className="mb-2 block text-sm font-medium text-black dark:text-white">
                             Código
@@ -136,6 +137,18 @@ export default function VentasPage() {
                             className="w-full rounded border border-stroke bg-transparent py-2 px-4 outline-none focus:border-primary dark:border-strokedark"
                             value={filters.cliente}
                             onChange={(e) => setFilters(prev => ({ ...prev, cliente: e.target.value }))}
+                        />
+                    </div>
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                            Exportación #
+                        </label>
+                        <input
+                            type="number"
+                            placeholder="ID..."
+                            className="w-full rounded border border-stroke bg-transparent py-2 px-4 outline-none focus:border-primary dark:border-strokedark"
+                            value={filters.exportacionId || ""}
+                            onChange={(e) => setFilters(prev => ({ ...prev, exportacionId: e.target.value }))}
                         />
                     </div>
                     <div>
@@ -172,6 +185,7 @@ export default function VentasPage() {
                             <option value="TODOS">Todos</option>
                             <option value="BORRADOR">Borrador</option>
                             <option value="CONFIRMADO">Confirmado</option>
+                            <option value="EXPORTADO">Exportado</option>
                             <option value="ENVIADO">Enviado</option>
                             <option value="FACTURADO">Facturado</option>
                         </select>
@@ -194,6 +208,7 @@ export default function VentasPage() {
                                     <th className="py-4 px-4 font-medium text-black dark:text-white">Cliente</th>
                                     <th className="py-4 px-4 font-medium text-black dark:text-white">Fecha</th>
                                     <th className="py-4 px-4 font-medium text-black dark:text-white">Estado</th>
+                                    <th className="py-4 px-4 font-medium text-black dark:text-white">Exp. #</th>
                                     <th className="py-4 px-4 font-medium text-black dark:text-white">Total</th>
                                     <th className="py-4 px-4 font-medium text-black dark:text-white">Acciones</th>
                                 </tr>
@@ -207,11 +222,19 @@ export default function VentasPage() {
                                         <td className="py-5 px-4">
                                             <span className={`inline-block rounded px-2.5 py-0.5 text-sm font-medium ${pedido.estado === 'BORRADOR' ? 'bg-gray-100 text-gray-600 dark:bg-meta-4 dark:text-white' :
                                                 pedido.estado === 'CONFIRMADO' ? 'bg-primary/10 text-primary' :
-                                                    pedido.estado === 'ENVIADO' ? 'bg-success/10 text-success' :
-                                                        'bg-warning/10 text-warning'
+                                                    pedido.estado === 'EXPORTADO' ? 'bg-purple-100 text-purple-700' :
+                                                        pedido.estado === 'ENVIADO' ? 'bg-success/10 text-success' :
+                                                            'bg-warning/10 text-warning'
                                                 }`}>
                                                 {pedido.estado}
                                             </span>
+                                        </td>
+                                        <td className="py-5 px-4 text-sm">
+                                            {pedido.exportacion_id ? (
+                                                <span className="font-mono bg-gray-100 px-2 py-1 rounded dark:bg-meta-4">
+                                                    #{pedido.exportacion_id}
+                                                </span>
+                                            ) : "-"}
                                         </td>
                                         <td className="py-5 px-4 font-bold text-success">
                                             {pedido.moneda === 'CRC' ? '₡' : '$'}

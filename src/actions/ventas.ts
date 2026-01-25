@@ -222,6 +222,7 @@ export async function getPedidosAction(
         fechaInicio?: string;
         fechaFin?: string;
         estado?: string;
+        exportacionId?: string;
     } = {}
 ) {
     try {
@@ -249,9 +250,14 @@ export async function getPedidosAction(
                 where.fecha_pedido.gte = new Date(filters.fechaInicio);
             }
             if (filters.fechaFin) {
-                // Set to end of day if just date provided, or handle as string
-                // Basic implementation:
                 where.fecha_pedido.lte = new Date(filters.fechaFin);
+            }
+        }
+
+        if (filters.exportacionId) {
+            const expId = parseInt(filters.exportacionId);
+            if (!isNaN(expId)) {
+                where.exportacion_id = expId;
             }
         }
 

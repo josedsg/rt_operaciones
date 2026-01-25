@@ -1,0 +1,450 @@
+{
+  "LISTAS_MAESTRAS": {
+    "GRUPOS": [
+      "FRESH CUT FLOWERS",
+      "REGULAR GREENS",
+      "TROPICAL FLOWERS",
+      "TROPICAL GREENS"
+    ],
+    "FAMILIAS": [
+      "AGAPANTHUS PRAECOX",
+      "ALPINIA PURPURATA",
+      "AMMI MAJUS",
+      "ASTILBE ARENDSII",
+      "ASTILBE JAPONICA",
+      "COSTUS",
+      "EUCALYPTUS SPP",
+      "GINGER TORCH",
+      "HELICONIA HANGING",
+      "STRELITZIA REGINAE"
+    ],
+    "VARIANTES_COLOR": [
+      "ASSORTED",
+      "BIRD OF PARADISE LEAVES",
+      "BLUE",
+      "BLUSH - MILK & HONEY",
+      "CINEREA TRUE BLUE",
+      "FRENCH KISS",
+      "GUNNII",
+      "LIGHT PINK - ERICKA",
+      "LIGHT PINK - EUROPA",
+      "LILAC - AMETHYST",
+      "ORANGE - BIRD OF PARADISE",
+      "PARVIFOLIA",
+      "PINK - CATTLEYA",
+      "PINK - EUROPA ALTO",
+      "PINK - GRANAT",
+      "PINK - HENNIE",
+      "PINK - HONEY TONK",
+      "PINK - ROSADO",
+      "POLIANTEMOS SILVER DOLLAR",
+      "PURPLE - MORADO",
+      "PURPLE - TAQUETII",
+      "RED",
+      "RED & PINK",
+      "RED - ALIVE & KICKING",
+      "RED - ELSE SCHLUCK",
+      "RED - FANAL",
+      "RED - GLUT",
+      "RED - LOVE & PRIDE",
+      "RED - PAUL GAARDER",
+      "SEXY PINK",
+      "SEXY SCARLET, ROSTRATA, SEXY ORANGE",
+      "SHE KONG",
+      "WHITE",
+      "WHITE - BRAUTSCHLEIER",
+      "WHITE - DIAMANT",
+      "WHITE - WASHINGTON"
+    ],
+    "TAMANOS_GRADO": [
+      "100 CM",
+      "40+ CM",
+      "50 - 60 CM",
+      "50+ CM",
+      "55+ CM",
+      "70+ CM",
+      "90 CM",
+      "LARGE",
+      "MEDIUM",
+      "MINI",
+      "PREMIUM - 60+ CM",
+      "PREMIUM - 80 CM",
+      "SELECT - 70 CM",
+      "SMALL"
+    ],
+    "EMPAQUES": [
+      "BULK",
+      "CB"
+    ],
+    "BOX_TYPES": [
+      {
+        "BOX_TYPE": "EB",
+        "EMPAQUE": [
+          "BULK"
+        ]
+      },
+      {
+        "BOX_TYPE": "EB FRESCA",
+        "EMPAQUE": [
+          "BULK",
+          "CB"
+        ]
+      },
+      {
+        "BOX_TYPE": "EB HOLEX",
+        "EMPAQUE": [
+          "BULK"
+        ]
+      },
+      {
+        "BOX_TYPE": "EB JET FRESH",
+        "EMPAQUE": [
+          "BULK"
+        ]
+      },
+      {
+        "BOX_TYPE": "EB KRAFT",
+        "EMPAQUE": [
+          "BULK",
+          "CB"
+        ]
+      },
+      {
+        "BOX_TYPE": "EB SOLE",
+        "EMPAQUE": [
+          "BULK"
+        ]
+      },
+      {
+        "BOX_TYPE": "EB SOLÉ",
+        "EMPAQUE": [
+          "BULK"
+        ]
+      },
+      {
+        "BOX_TYPE": "FB",
+        "EMPAQUE": [
+          "BULK"
+        ]
+      },
+      {
+        "BOX_TYPE": "HB",
+        "EMPAQUE": [
+          "BULK"
+        ]
+      },
+      {
+        "BOX_TYPE": "QB",
+        "EMPAQUE": [
+          "BULK"
+        ]
+      },
+      {
+        "BOX_TYPE": "QB FRESCA",
+        "EMPAQUE": [
+          "BULK"
+        ]
+      },
+      {
+        "BOX_TYPE": "QB HOLEX",
+        "EMPAQUE": [
+          "BULK"
+        ]
+      },
+      {
+        "BOX_TYPE": "QB JET FRESH",
+        "EMPAQUE": [
+          "BULK"
+        ]
+      },
+      {
+        "BOX_TYPE": "QB KRAFT",
+        "EMPAQUE": [
+          "BULK"
+        ]
+      },
+      {
+        "BOX_TYPE": "QB SOLÉ",
+        "EMPAQUE": [
+          "BULK"
+        ]
+      }
+    ]
+  },
+  "JERARQUIA": [
+    {
+      "GRUPO": "FRESH CUT FLOWERS",
+      "FAMILIAS": [
+        {
+          "FAMILIA": "AGAPANTHUS PRAECOX",
+          "VARIANTES_COLOR": [
+            "BLUE"
+          ],
+          "TAMANOS_GRADO": [
+            "PREMIUM - 80 CM",
+            "SELECT - 70 CM"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                "QB FRESCA",
+                "QB HOLEX",
+                "QB JET FRESH",
+                "QB KRAFT",
+                "QB SOLÉ"
+              ]
+            }
+          ]
+        },
+        {
+          "FAMILIA": "AMMI MAJUS",
+          "VARIANTES_COLOR": [
+            "WHITE"
+          ],
+          "TAMANOS_GRADO": [
+            "70+ CM"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                "QB FRESCA",
+                "QB HOLEX",
+                "QB JET FRESH",
+                "QB KRAFT",
+                "QB SOLÉ"
+              ]
+            }
+          ]
+        },
+        {
+          "FAMILIA": "ASTILBE ARENDSII",
+          "VARIANTES_COLOR": [
+            "BLUSH - MILK & HONEY",
+            "LIGHT PINK - ERICKA",
+            "LILAC - AMETHYST",
+            "PINK - CATTLEYA",
+            "PINK - GRANAT",
+            "PINK - HENNIE",
+            "PINK - HONEY TONK",
+            "PINK - ROSADO",
+            "PURPLE - MORADO",
+            "PURPLE - TAQUETII",
+            "RED - ALIVE & KICKING",
+            "RED - ELSE SCHLUCK",
+            "RED - GLUT",
+            "RED - LOVE & PRIDE",
+            "RED - PAUL GAARDER",
+            "WHITE - BRAUTSCHLEIER",
+            "WHITE - DIAMANT"
+          ],
+          "TAMANOS_GRADO": [
+            "40+ CM",
+            "50+ CM",
+            "55+ CM"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                "EB FRESCA",
+                "EB HOLEX",
+                "EB JET FRESH",
+                "EB KRAFT",
+                "EB SOLE",
+                "EB SOLÉ"
+              ]
+            }
+          ]
+        },
+        {
+          "FAMILIA": "ASTILBE JAPONICA",
+          "VARIANTES_COLOR": [
+            "ASSORTED",
+            "LIGHT PINK - EUROPA",
+            "PINK - EUROPA ALTO",
+            "RED - FANAL",
+            "WHITE - WASHINGTON"
+          ],
+          "TAMANOS_GRADO": [
+            "40+ CM",
+            "50+ CM",
+            "55+ CM"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                "EB FRESCA",
+                "EB HOLEX",
+                "EB JET FRESH",
+                "EB KRAFT",
+                "EB SOLÉ"
+              ]
+            },
+            {
+              "EMPAQUE": "CB",
+              "BOX_TYPES": [
+                "EB FRESCA",
+                "EB KRAFT"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "GRUPO": "REGULAR GREENS",
+      "FAMILIAS": [
+        {
+          "FAMILIA": "EUCALYPTUS SPP",
+          "VARIANTES_COLOR": [
+            "ASSORTED",
+            "CINEREA TRUE BLUE",
+            "GUNNII",
+            "PARVIFOLIA",
+            "POLIANTEMOS SILVER DOLLAR"
+          ],
+          "TAMANOS_GRADO": [
+            "50 - 60 CM"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                "QB"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "GRUPO": "TROPICAL FLOWERS",
+      "FAMILIAS": [
+        {
+          "FAMILIA": "ALPINIA PURPURATA",
+          "VARIANTES_COLOR": [
+            "ASSORTED",
+            "RED"
+          ],
+          "TAMANOS_GRADO": [
+            "LARGE",
+            "MEDIUM",
+            "MINI",
+            "SMALL"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                "EB",
+                "FB",
+                "HB"
+              ]
+            }
+          ]
+        },
+        {
+          "FAMILIA": "COSTUS",
+          "VARIANTES_COLOR": [
+            "FRENCH KISS"
+          ],
+          "TAMANOS_GRADO": [
+            "100 CM"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                "HB"
+              ]
+            }
+          ]
+        },
+        {
+          "FAMILIA": "GINGER TORCH",
+          "VARIANTES_COLOR": [
+            "RED & PINK"
+          ],
+          "TAMANOS_GRADO": [
+            "90 CM"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                "HB"
+              ]
+            }
+          ]
+        },
+        {
+          "FAMILIA": "HELICONIA HANGING",
+          "VARIANTES_COLOR": [
+            "SEXY PINK",
+            "SEXY SCARLET, ROSTRATA, SEXY ORANGE",
+            "SHE KONG"
+          ],
+          "TAMANOS_GRADO": [
+            "90 CM"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                "FB"
+              ]
+            }
+          ]
+        },
+        {
+          "FAMILIA": "STRELITZIA REGINAE",
+          "VARIANTES_COLOR": [
+            "ORANGE - BIRD OF PARADISE"
+          ],
+          "TAMANOS_GRADO": [
+            "PREMIUM - 80 CM"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                "QB FRESCA",
+                "QB HOLEX",
+                "QB JET FRESH",
+                "QB KRAFT",
+                "QB SOLÉ"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "GRUPO": "TROPICAL GREENS",
+      "FAMILIAS": [
+        {
+          "FAMILIA": "STRELITZIA REGINAE",
+          "VARIANTES_COLOR": [
+            "BIRD OF PARADISE LEAVES"
+          ],
+          "TAMANOS_GRADO": [
+            "PREMIUM - 60+ CM"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                "QB JET FRESH",
+                "QB KRAFT"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "NOTA": "BOX_TYPES AHORA INCLUYEN LA LLAVE EMPAQUE A NIVEL DE DATO MAESTRO"
+}

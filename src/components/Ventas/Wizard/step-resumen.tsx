@@ -12,6 +12,7 @@ interface StepResumenProps {
     data: PedidoVentaInput;
     updateData: (data: Partial<PedidoVentaInput>) => void;
     onConfirm?: () => void;
+    isReadOnly?: boolean;
 }
 
 type FullCliente = Cliente & {
@@ -22,7 +23,7 @@ type FullCliente = Cliente & {
     distrito: Distrito | null;
 };
 
-export function StepResumen({ data, updateData, onConfirm }: StepResumenProps) {
+export function StepResumen({ data, updateData, onConfirm, isReadOnly = false }: StepResumenProps) {
     const [uploading, setUploading] = useState(false);
     const [companyConfig, setCompanyConfig] = useState<CompanyConfig | null>(null);
     const [usuarios, setUsuarios] = useState<Usuario[]>([]);
@@ -157,11 +158,11 @@ export function StepResumen({ data, updateData, onConfirm }: StepResumenProps) {
                             {/* Confirm Button */}
                             <button
                                 onClick={onConfirm}
-                                disabled={!onConfirm}
-                                className={`print:hidden flex items-center gap-2 px-4 py-2 rounded shadow transition-all text-sm font-bold ${onConfirm ? "bg-success text-white hover:bg-opacity-90" : "bg-gray-300 text-gray-500 cursor-not-allowed"}`}
+                                disabled={!onConfirm || isReadOnly}
+                                className={`print:hidden flex items-center gap-2 px-4 py-2 rounded shadow transition-all text-sm font-bold ${onConfirm && !isReadOnly ? "bg-green-600 text-white hover:bg-green-700" : "bg-gray-300 text-gray-500 cursor-not-allowed"}`}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                {onConfirm ? "Confirmar Pedido" : "Confirmar (N/A)"}
+                                {onConfirm ? (isReadOnly ? "Solo Lectura" : "Confirmar Pedido") : "Confirmar (N/A)"}
                             </button>
 
                             {/* Electronic Key Display (Simulated) */}

@@ -8,9 +8,10 @@ import { Cliente } from "@prisma/client";
 interface StepEncabezadoProps {
     data: PedidoVentaInput;
     updateData: (data: Partial<PedidoVentaInput>) => void;
+    isReadOnly?: boolean;
 }
 
-export function StepEncabezado({ data, updateData }: StepEncabezadoProps) {
+export function StepEncabezado({ data, updateData, isReadOnly = false }: StepEncabezadoProps) {
     const [clientes, setClientes] = useState<Cliente[]>([]);
 
     useEffect(() => {
@@ -29,7 +30,8 @@ export function StepEncabezado({ data, updateData }: StepEncabezadoProps) {
                 <select
                     value={data.cliente_id}
                     onChange={(e) => updateData({ cliente_id: Number(e.target.value) })}
-                    className="w-full rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    disabled={isReadOnly}
+                    className="w-full rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary disabled:cursor-not-allowed disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 >
                     <option value={0}>Seleccione un cliente</option>
                     {clientes.map(c => (
@@ -48,7 +50,8 @@ export function StepEncabezado({ data, updateData }: StepEncabezadoProps) {
                     type="date"
                     value={data.fecha_pedido instanceof Date ? data.fecha_pedido.toISOString().split('T')[0] : data.fecha_pedido}
                     onChange={(e) => updateData({ fecha_pedido: new Date(e.target.value) })}
-                    className="w-full rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    disabled={isReadOnly}
+                    className="w-full rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary disabled:cursor-not-allowed disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 />
             </div>
 
@@ -61,7 +64,8 @@ export function StepEncabezado({ data, updateData }: StepEncabezadoProps) {
                     placeholder="Ej. 123-45678901"
                     value={data.awd || ""}
                     onChange={(e) => updateData({ awd: e.target.value })}
-                    className="w-full rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    disabled={isReadOnly}
+                    className="w-full rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary disabled:cursor-not-allowed disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 />
             </div>
 
@@ -72,11 +76,13 @@ export function StepEncabezado({ data, updateData }: StepEncabezadoProps) {
                 <select
                     value={data.estado || "BORRADOR"}
                     onChange={(e) => updateData({ estado: e.target.value })}
-                    className="w-full rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    disabled={isReadOnly}
+                    className="w-full rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary disabled:cursor-not-allowed disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 >
                     <option value="BORRADOR">BORRADOR</option>
                     <option value="CONFIRMADO">CONFIRMADO</option>
                     <option value="ANULADO">ANULADO</option>
+                    <option value="EXPORTADO" disabled>EXPORTADO (Sistema)</option>
                 </select>
             </div>
 
@@ -87,7 +93,8 @@ export function StepEncabezado({ data, updateData }: StepEncabezadoProps) {
                 <select
                     value={data.moneda || "USD"}
                     onChange={(e) => updateData({ moneda: e.target.value })}
-                    className="w-full rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    disabled={isReadOnly}
+                    className="w-full rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary disabled:cursor-not-allowed disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 >
                     <option value="USD">Dólares (USD $)</option>
                     <option value="CRC">Colones (CRC ₡)</option>
@@ -103,7 +110,8 @@ export function StepEncabezado({ data, updateData }: StepEncabezadoProps) {
                     placeholder="Notas adicionales del pedido"
                     value={data.descripcion || ""}
                     onChange={(e) => updateData({ descripcion: e.target.value })}
-                    className="w-full rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    disabled={isReadOnly}
+                    className="w-full rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary disabled:cursor-not-allowed disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 />
             </div>
         </div>

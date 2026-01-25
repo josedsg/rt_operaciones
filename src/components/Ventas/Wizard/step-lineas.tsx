@@ -15,9 +15,10 @@ import { AssortedModal } from "./assorted-modal";
 interface StepLineasProps {
     data: PedidoVentaInput;
     updateData: (data: Partial<PedidoVentaInput>) => void;
+    isReadOnly?: boolean;
 }
 
-export function StepLineas({ data, updateData }: StepLineasProps) {
+export function StepLineas({ data, updateData, isReadOnly = false }: StepLineasProps) {
     // Catalogs
     const [proveedores, setProveedores] = useState<Proveedor[]>([]);
     const [familias, setFamilias] = useState<Familia[]>([]);
@@ -409,402 +410,402 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
     return (
         <div className="flex flex-col gap-6">
             {/* Formulario de Linea Rediseñado */}
-            <div className={`rounded-xl border shadow-sm p-8 transition-all duration-300 ${isEditing !== null ? 'bg-blue-50 dark:bg-meta-4 border-primary shadow-md' : 'bg-white dark:bg-boxdark border-stroke dark:border-strokedark'}`}>
-                <div className="flex items-center justify-between mb-6 border-b border-stroke dark:border-strokedark pb-4">
-                    <h4 className="font-black text-black dark:text-white uppercase tracking-widest flex items-center gap-2">
-                        <div className={`h-2 w-2 rounded-full ${isEditing !== null ? 'bg-primary animate-pulse' : 'bg-success'}`}></div>
-                        {isEditing !== null ? 'Editando Línea' : 'Agregar Nuevo Producto'}
-                    </h4>
-                    {isEditing !== null && (
-                        <button onClick={cancelEdit} className="text-gray-400 hover:text-danger transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                        </button>
-                    )}
-                </div>
-
-                <div className="space-y-6">
-                    {/* Fila 1: Origen y Familia */}
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                        <div className="md:col-span-5">
-                            <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
-                                <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white text-xs">1</span>
-                                Proveedor Origen
-                            </label>
-                            <select
-                                ref={proveedorRef}
-                                className="w-full rounded-md border border-stroke bg-gray-50 py-2.5 px-4 dark:bg-meta-4 dark:border-strokedark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-semibold text-sm"
-                                value={newLine.proveedor_id || 0}
-                                onChange={(e) => setNewLine({ ...newLine, proveedor_id: Number(e.target.value) })}
-                            >
-                                <option value={0}>Seleccione Proveedor</option>
-                                {proveedores.map(p => (
-                                    <option key={p.id} value={p.id}>{p.nombre}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="md:col-span-7">
-                            <Combobox
-                                label={<><span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white text-xs">2</span>Familia / Tipo de Flor</>}
-                                labelClassName="text-sm font-bold text-black dark:text-white" // Custom prominent style
-                                placeholder="Buscar familia..."
-                                options={filteredFamilias.map(f => ({
-                                    value: f.id,
-                                    label: f.nombre_cientifico,
-                                    secondaryLabel: ""
-                                }))}
-                                value={newLine.familia_id}
-                                onChange={(val) => setNewLine({ ...newLine, familia_id: Number(val) })}
-                            />
-                        </div>
+            {!isReadOnly && (
+                <div className={`rounded-xl border shadow-sm p-8 transition-all duration-300 ${isEditing !== null ? 'bg-blue-50 dark:bg-meta-4 border-primary shadow-md' : 'bg-white dark:bg-boxdark border-stroke dark:border-strokedark'}`}>
+                    <div className="flex items-center justify-between mb-6 border-b border-stroke dark:border-strokedark pb-4">
+                        <h4 className="font-black text-black dark:text-white uppercase tracking-widest flex items-center gap-2">
+                            <div className={`h-2 w-2 rounded-full ${isEditing !== null ? 'bg-primary animate-pulse' : 'bg-success'}`}></div>
+                            {isEditing !== null ? 'Editando Línea' : 'Agregar Nuevo Producto'}
+                        </h4>
+                        {isEditing !== null && (
+                            <button onClick={cancelEdit} className="text-gray-400 hover:text-danger transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                        )}
                     </div>
 
+                    <div className="space-y-6">
+                        {/* Fila 1: Origen y Familia */}
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                            <div className="md:col-span-5">
+                                <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
+                                    <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white text-xs">1</span>
+                                    Proveedor Origen
+                                </label>
+                                <select
+                                    ref={proveedorRef}
+                                    className="w-full rounded-md border border-stroke bg-gray-50 py-2.5 px-4 dark:bg-meta-4 dark:border-strokedark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-semibold text-sm"
+                                    value={newLine.proveedor_id || 0}
+                                    onChange={(e) => setNewLine({ ...newLine, proveedor_id: Number(e.target.value) })}
+                                >
+                                    <option value={0}>Seleccione Proveedor</option>
+                                    {proveedores.map(p => (
+                                        <option key={p.id} value={p.id}>{p.nombre}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="md:col-span-7">
+                                <Combobox
+                                    label={<><span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white text-xs">2</span>Familia / Tipo de Flor</>}
+                                    labelClassName="text-sm font-bold text-black dark:text-white" // Custom prominent style
+                                    placeholder="Buscar familia..."
+                                    options={filteredFamilias.map(f => ({
+                                        value: f.id,
+                                        label: f.nombre_cientifico,
+                                        secondaryLabel: ""
+                                    }))}
+                                    value={newLine.familia_id}
+                                    onChange={(val) => setNewLine({ ...newLine, familia_id: Number(val) })}
+                                />
+                            </div>
+                        </div>
 
-                    {/* Fila 2: Selección en Cascada */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
-                                <span className="mr-2 inline-flex items-center justify-center rounded-full bg-primary h-5 w-5 text-xs text-white">3</span>
-                                Producto
-                            </label>
-                            <div className="relative z-20 bg-transparent dark:bg-form-input">
-                                <select
-                                    className="w-full rounded-md border border-stroke bg-gray-50 py-2 px-4 dark:bg-meta-4 focus:border-primary outline-none text-xs font-bold"
-                                    value={selectedProductName}
-                                    onChange={(e) => {
-                                        setSelectedProductName(e.target.value);
-                                        setSelectedVarianteId(0);
-                                        setSelectedTamanoId(0);
-                                        setNewLine(prev => ({ ...prev, producto_id: 0 }));
-                                    }}
-                                    disabled={!newLine.familia_id}
-                                >
-                                    <option value="">Seleccionar Producto</option>
-                                    {uniqueProductNames.map((name, i) => (
-                                        <option key={i} value={name}>{name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                        <div>
-                            <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
-                                Variedad
-                            </label>
-                            <div className="relative z-20 bg-transparent dark:bg-form-input">
-                                <select
-                                    className="w-full rounded-md border border-stroke bg-gray-50 py-2 px-4 dark:bg-meta-4 focus:border-primary outline-none text-xs font-bold"
-                                    value={selectedVarianteId}
-                                    onChange={(e) => {
-                                        setSelectedVarianteId(Number(e.target.value));
-                                        setSelectedTamanoId(0);
-                                        setNewLine(prev => ({ ...prev, producto_id: 0 }));
-                                    }}
-                                    disabled={!selectedProductName}
-                                >
-                                    <option value={0}>Seleccionar Variedad</option>
-                                    {availableVariantes.map((v) => (
-                                        <option key={v.id} value={v.id}>{v.nombre}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                        <div>
-                            <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
-                                Tamaño
-                            </label>
-                            <div className="relative z-20 bg-transparent dark:bg-form-input">
-                                <select
-                                    className="w-full rounded-md border border-stroke bg-gray-50 py-2 px-4 dark:bg-meta-4 focus:border-primary outline-none text-xs font-bold"
-                                    value={selectedTamanoId}
-                                    onChange={(e) => {
-                                        setSelectedTamanoId(Number(e.target.value));
-                                    }}
-                                    disabled={!selectedVarianteId}
-                                >
-                                    <option value={0}>Seleccionar Tamaño</option>
-                                    {availableTamanos.map((t) => (
-                                        <option key={t.id} value={t.id}>{t.nombre}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
 
-                    {/* Fila 3: Selección de Empaque Operativo */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-stroke dark:border-strokedark pt-4">
-                        <div>
-                            <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
-                                <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white text-xs">4</span>
-                                Tipo de Empaque
-                            </label>
-                            <select
-                                className="w-full rounded-md border border-stroke bg-gray-50 py-2 px-4 dark:bg-meta-4 focus:border-primary outline-none text-xs font-bold"
-                                value={selectedTipoEmpaque}
-                                onChange={(e) => {
-                                    const tid = Number(e.target.value);
-                                    setSelectedTipoEmpaque(tid);
-                                    setSelectedEmpaqueId(0);
-                                    setNewLine(prev => ({
-                                        ...prev,
-                                        stems_per_bunch: 0,
-                                        bunches_per_box: 0,
-                                        empaque_nombre: ""
-                                    }));
-                                }}
-                            >
-                                <option value={0}>Todos los tipos</option>
-                                {tiposEmpaque.map(t => (
-                                    <option key={t.id} value={t.id}>{t.nombre}</option>
-                                ))}
-                            </select>
+                        {/* Fila 2: Selección en Cascada */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
+                                    <span className="mr-2 inline-flex items-center justify-center rounded-full bg-primary h-5 w-5 text-xs text-white">3</span>
+                                    Producto
+                                </label>
+                                <div className="relative z-20 bg-transparent dark:bg-form-input">
+                                    <select
+                                        className="w-full rounded-md border border-stroke bg-gray-50 py-2 px-4 dark:bg-meta-4 focus:border-primary outline-none text-xs font-bold"
+                                        value={selectedProductName}
+                                        onChange={(e) => {
+                                            setSelectedProductName(e.target.value);
+                                            setSelectedVarianteId(0);
+                                            setSelectedTamanoId(0);
+                                            setNewLine(prev => ({ ...prev, producto_id: 0 }));
+                                        }}
+                                        disabled={!newLine.familia_id}
+                                    >
+                                        <option value="">Seleccionar Producto</option>
+                                        {uniqueProductNames.map((name, i) => (
+                                            <option key={i} value={name}>{name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
+                                    Variedad
+                                </label>
+                                <div className="relative z-20 bg-transparent dark:bg-form-input">
+                                    <select
+                                        className="w-full rounded-md border border-stroke bg-gray-50 py-2 px-4 dark:bg-meta-4 focus:border-primary outline-none text-xs font-bold"
+                                        value={selectedVarianteId}
+                                        onChange={(e) => {
+                                            setSelectedVarianteId(Number(e.target.value));
+                                            setSelectedTamanoId(0);
+                                            setNewLine(prev => ({ ...prev, producto_id: 0 }));
+                                        }}
+                                        disabled={!selectedProductName}
+                                    >
+                                        <option value={0}>Seleccionar Variedad</option>
+                                        {availableVariantes.map((v) => (
+                                            <option key={v.id} value={v.id}>{v.nombre}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
+                                    Tamaño
+                                </label>
+                                <div className="relative z-20 bg-transparent dark:bg-form-input">
+                                    <select
+                                        className="w-full rounded-md border border-stroke bg-gray-50 py-2 px-4 dark:bg-meta-4 focus:border-primary outline-none text-xs font-bold"
+                                        value={selectedTamanoId}
+                                        onChange={(e) => {
+                                            setSelectedTamanoId(Number(e.target.value));
+                                        }}
+                                        disabled={!selectedVarianteId}
+                                    >
+                                        <option value={0}>Seleccionar Tamaño</option>
+                                        {availableTamanos.map((t) => (
+                                            <option key={t.id} value={t.id}>{t.nombre}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
-                                <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white text-xs">5</span>
-                                Configuración de Caja (Empaque)
-                            </label>
-                            <select
-                                className="w-full rounded-md border border-stroke bg-gray-50 py-2 px-4 dark:bg-meta-4 focus:border-primary outline-none text-xs font-bold uppercase"
-                                value={selectedEmpaqueId}
-                                onChange={(e) => {
-                                    const eid = Number(e.target.value);
-                                    setSelectedEmpaqueId(eid);
-                                    const emp = empaques.find(em => em.id === eid);
-                                    if (emp) {
+
+                        {/* Fila 3: Selección de Empaque Operativo */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-stroke dark:border-strokedark pt-4">
+                            <div>
+                                <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
+                                    <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white text-xs">4</span>
+                                    Tipo de Empaque
+                                </label>
+                                <select
+                                    className="w-full rounded-md border border-stroke bg-gray-50 py-2 px-4 dark:bg-meta-4 focus:border-primary outline-none text-xs font-bold"
+                                    value={selectedTipoEmpaque}
+                                    onChange={(e) => {
+                                        const tid = Number(e.target.value);
+                                        setSelectedTipoEmpaque(tid);
+                                        setSelectedEmpaqueId(0);
                                         setNewLine(prev => ({
                                             ...prev,
-                                            empaque_id: eid,
-                                            stems_per_bunch: emp.sxb,
-                                            bunches_per_box: emp.bxb,
-                                            empaque_nombre: emp.nombre
-                                        }));
-                                    } else {
-                                        setNewLine(prev => ({
-                                            ...prev,
-                                            empaque_id: 0,
                                             stems_per_bunch: 0,
                                             bunches_per_box: 0,
                                             empaque_nombre: ""
                                         }));
-                                    }
-                                }}
-                            >
-                                <option value={0}>— Seleccionar Empaque —</option>
-                                {filteredEmpaques.map(e => (
-                                    <option key={e.id} value={e.id}>{e.nombre} ({e.sxb}x{e.bxb})</option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    {/* Fila 4: Detalles de Bultos y Precios */}
-                    {/* Fila 4: Detalles de Bultos y Precios - IMPROVED LAYOUT */}
-                    <div className="grid grid-cols-2 md:grid-cols-12 gap-6 pt-4">
-                        {/* Empaque */}
-
-                        <div className="col-span-2 md:col-span-2">
-                            <label className="mb-2 block text-xs font-black text-gray-500 uppercase tracking-wider">PO</label>
-                            <input
-                                type="text"
-                                className="w-full rounded-lg border-2 border-stroke bg-white py-3 px-4 dark:bg-boxdark focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none text-xl font-black text-center text-black dark:text-white transition-all shadow-sm"
-                                value={newLine.po || ""}
-                                onChange={(e) => setNewLine({ ...newLine, po: e.target.value })}
-                                placeholder="PO#"
-                            />
-                        </div>
-
-                        {/* Empaque  (Ya estaba el div wrapper, lo reutilizamos para Cajas o lo dividimos) */}
-                        <div className="col-span-2 md:col-span-2">
-
-
-                            <label className="mb-2 block text-xs font-black text-primary uppercase tracking-wider">Cajas</label>
-                            <input
-                                type="number"
-                                className="w-full rounded-lg border-2 border-stroke bg-white py-3 px-4 dark:bg-boxdark focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none text-xl font-black text-center text-black dark:text-white transition-all shadow-sm"
-                                value={newLine.cajas}
-                                onChange={(e) => setNewLine({ ...newLine, cajas: Number(e.target.value) })}
-                                placeholder="0"
-                                autoFocus
-                            />
-                        </div>
-                        <div className="col-span-1 md:col-span-1">
-                            <label className="mb-2 block text-xs font-bold text-gray-500 uppercase tracking-tighter">Stems/Bun</label>
-                            <input
-                                type="number"
-                                readOnly
-                                tabIndex={-1}
-                                className="w-full rounded-lg border-2 border-primary/30 bg-primary/5 py-3 px-2 dark:bg-meta-4 outline-none text-lg font-bold text-center text-primary cursor-not-allowed"
-                                value={newLine.stems_per_bunch}
-                            />
-                        </div>
-                        <div className="col-span-1 md:col-span-1">
-                            <label className="mb-2 block text-xs font-bold text-gray-500 uppercase tracking-tighter">Bun/Box</label>
-                            <input
-                                type="number"
-                                readOnly
-                                tabIndex={-1}
-                                className="w-full rounded-lg border-2 border-primary/30 bg-primary/5 py-3 px-2 dark:bg-meta-4 outline-none text-lg font-bold text-center text-primary cursor-not-allowed"
-                                value={newLine.bunches_per_box}
-                            />
-                        </div>
-
-                        {/* Precios */}
-                        <div className="col-span-2 md:col-span-2">
-                            <label className="mb-2 block text-xs font-black text-success uppercase tracking-wider">Precio Unitario</label>
-                            <div className="relative group">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg group-focus-within:text-success transition-colors">{monedaSimbolo}</span>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    className="w-full rounded-lg border-2 border-stroke bg-white py-3 pl-8 pr-4 dark:bg-boxdark focus:border-success focus:ring-4 focus:ring-success/10 outline-none text-xl font-black text-success transition-all shadow-sm"
-                                    value={newLine.precio_unitario}
-                                    onChange={(e) => setNewLine({ ...newLine, precio_unitario: Number(e.target.value) })}
-                                    placeholder="0.00"
-                                />
-                            </div>
-                        </div>
-                        <div className="col-span-2 md:col-span-2">
-                            <label className="mb-2 block text-xs font-black text-gray-500 uppercase tracking-wider">P. Prov</label>
-                            <div className="relative group">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg group-focus-within:text-primary transition-colors">{monedaSimbolo}</span>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    className="w-full rounded-lg border-2 border-stroke bg-white py-3 pl-8 pr-4 dark:bg-boxdark focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none text-xl font-black text-gray-700 dark:text-white transition-all shadow-sm"
-                                    value={newLine.precio_proveedor}
-                                    onChange={(e) => setNewLine({ ...newLine, precio_proveedor: Number(e.target.value) })}
-                                    placeholder="0.00"
-                                />
-                            </div>
-                        </div>
-                        <div className="col-span-2 md:col-span-2">
-                            <label className="mb-2 block text-xs font-bold text-gray-500 uppercase tracking-tighter">IVA %</label>
-                            <input
-                                type="number"
-                                readOnly
-                                tabIndex={-1}
-                                className="w-full rounded-lg border-2 border-primary/30 bg-primary/5 py-3 px-2 dark:bg-meta-4 outline-none text-lg font-bold text-center text-primary cursor-not-allowed"
-                                value={newLine.impuesto}
-                            />
-                        </div>
-
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-4 pt-2">
-                        <div>
-                            <label className="mb-2 block text-xs font-bold text-black dark:text-white uppercase tracking-wide">
-                                Especificaciones del Producto (Opción Libre)
-                            </label>
-                            <textarea
-                                rows={2}
-                                className="w-full rounded-lg border border-stroke bg-white py-3 px-4 dark:bg-boxdark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-black dark:text-white transition-all shadow-sm resize-y"
-                                value={newLine.especificaciones || ""}
-                                onChange={(e) => setNewLine({ ...newLine, especificaciones: e.target.value })}
-                                placeholder="Escriba aquí cualquier detalle adicional, instrucciones especiales o notas largas..."
-                            ></textarea>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-10 gap-6 pt-0">
-                        {/* Botón rápido */}
-                        <div className="col-span-2 md:col-span-2 flex items-end">
-                            {/* Placeholder or secondary action if needed */}
-                            <div className="w-full h-full flex items-center justify-center pt-6">
-                                <span className="text-[10px] uppercase text-gray-400 font-bold tracking-widest text-center">
-                                    {newLine.cantidad > 0 ? `${newLine.cantidad.toLocaleString()} Tallos` : 'Ingrese Cajas'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Fila 5: Resumen Detallado y Acción Principal */}
-                    <div className="bg-gray-50 dark:bg-meta-4 p-6 rounded-xl border border-dashed border-gray-300 dark:border-strokedark mt-4">
-                        <h5 className="font-bold text-black dark:text-white uppercase text-xs tracking-widest mb-4 flex items-center gap-2">
-                            <span className="bg-gray-200 dark:bg-gray-700 text-[10px] px-2 py-0.5 rounded">Vista Previa</span>
-                            Detalles de la Línea
-                        </h5>
-
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                            {/* Producto */}
-                            <div className="p-3 bg-white dark:bg-boxdark rounded-lg shadow-sm border border-stroke dark:border-strokedark">
-                                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Producto</label>
-                                <div className="text-sm font-bold text-black dark:text-white truncate">
-                                    {selectedProduct?.nombre || "—"} {selectedProduct?.tamano?.nombre ? `- ${selectedProduct.tamano.nombre}` : ""}
-                                </div>
-                                <div className="text-[10px] text-gray-500 truncate">{selectedProduct?.variante?.nombre}</div>
-                            </div>
-
-                            {/* Volumen */}
-                            <div className="p-3 bg-white dark:bg-boxdark rounded-lg shadow-sm border border-stroke dark:border-strokedark">
-                                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Volumen</label>
-                                <div className="text-sm font-black text-black dark:text-white">
-                                    {newLine.cajas} <span className="text-[10px] font-normal text-gray-500">Cajas</span>
-                                </div>
-                                <div className="text-[10px] text-gray-500 font-medium truncate">{newLine.empaque_nombre}</div>
-                                <div className="text-[10px] text-gray-500">{(newLine.cantidad || 0).toLocaleString()} Tallos</div>
-                            </div>
-
-                            {/* Precio */}
-                            <div className="p-3 bg-white dark:bg-boxdark rounded-lg shadow-sm border border-stroke dark:border-strokedark">
-                                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Precio Unit.</label>
-                                <div className="text-sm font-black text-success">
-                                    {monedaSimbolo}{(newLine.precio_unitario || 0).toFixed(2)}
-                                </div>
-                                <div className="text-[10px] text-gray-500">Mas impuestos</div>
-                            </div>
-
-                            {/* Total Linea */}
-                            <div className="p-3 bg-primary/5 dark:bg-primary/20 rounded-lg shadow-sm border border-primary/20">
-                                <label className="block text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Total Estimado</label>
-                                <div className="text-lg font-black text-primary">
-                                    {monedaSimbolo}{((newLine.cantidad || 0) * (newLine.precio_unitario || 0)).toFixed(2)}
-                                </div>
-                                <div className="text-[10px] text-primary/70">Subtotal Línea</div>
-                            </div>
-                        </div>
-
-                        <div className="flex justify-end gap-4 w-full">
-                            {selectedProduct && selectedProduct.variante.nombre.toUpperCase().includes("ASSORTED") && (
-                                <button
-                                    onClick={() => setIsAssortedModalOpen(true)}
-                                    className={`px-4 py-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 border-2 transition-all uppercase tracking-wider ${newLine.assorted_config && newLine.assorted_config.length > 0
-                                        ? 'bg-success/10 text-success border-success'
-                                        : 'bg-warning/10 text-warning border-warning animate-pulse'
-                                        }`}
+                                    }}
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                                    {newLine.assorted_config && newLine.assorted_config.length > 0 ? 'Surtido Configurado' : 'Configurar Surtido'}
-                                </button>
-                            )}
-                            {isEditing !== null ? (
-                                <>
+                                    <option value={0}>Todos los tipos</option>
+                                    {tiposEmpaque.map(t => (
+                                        <option key={t.id} value={t.id}>{t.nombre}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
+                                    <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white text-xs">5</span>
+                                    Configuración de Caja (Empaque)
+                                </label>
+                                <select
+                                    className="w-full rounded-md border border-stroke bg-gray-50 py-2 px-4 dark:bg-meta-4 focus:border-primary outline-none text-xs font-bold uppercase"
+                                    value={selectedEmpaqueId}
+                                    onChange={(e) => {
+                                        const eid = Number(e.target.value);
+                                        setSelectedEmpaqueId(eid);
+                                        const emp = empaques.find(em => em.id === eid);
+                                        if (emp) {
+                                            setNewLine(prev => ({
+                                                ...prev,
+                                                empaque_id: eid,
+                                                stems_per_bunch: emp.sxb,
+                                                bunches_per_box: emp.bxb,
+                                                empaque_nombre: emp.nombre
+                                            }));
+                                        } else {
+                                            setNewLine(prev => ({
+                                                ...prev,
+                                                empaque_id: 0,
+                                                stems_per_bunch: 0,
+                                                bunches_per_box: 0,
+                                                empaque_nombre: ""
+                                            }));
+                                        }
+                                    }}
+                                >
+                                    <option value={0}>— Seleccionar Empaque —</option>
+                                    {filteredEmpaques.map(e => (
+                                        <option key={e.id} value={e.id}>{e.nombre} ({e.sxb}x{e.bxb})</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Fila 4: Detalles de Bultos y Precios */}
+                        {/* Fila 4: Detalles de Bultos y Precios - IMPROVED LAYOUT */}
+                        <div className="grid grid-cols-2 md:grid-cols-12 gap-6 pt-4">
+                            {/* Empaque */}
+
+                            <div className="col-span-2 md:col-span-2">
+                                <label className="mb-2 block text-xs font-black text-gray-500 uppercase tracking-wider">PO</label>
+                                <input
+                                    type="text"
+                                    className="w-full rounded-lg border-2 border-stroke bg-white py-3 px-4 dark:bg-boxdark focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none text-xl font-black text-center text-black dark:text-white transition-all shadow-sm"
+                                    value={newLine.po || ""}
+                                    onChange={(e) => setNewLine({ ...newLine, po: e.target.value })}
+                                    placeholder="PO#"
+                                />
+                            </div>
+
+                            {/* Empaque  (Ya estaba el div wrapper, lo reutilizamos para Cajas o lo dividimos) */}
+                            <div className="col-span-2 md:col-span-2">
+
+
+                                <label className="mb-2 block text-xs font-black text-primary uppercase tracking-wider">Cajas</label>
+                                <input
+                                    type="number"
+                                    className="w-full rounded-lg border-2 border-stroke bg-white py-3 px-4 dark:bg-boxdark focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none text-xl font-black text-center text-black dark:text-white transition-all shadow-sm"
+                                    value={newLine.cajas}
+                                    onChange={(e) => setNewLine({ ...newLine, cajas: Number(e.target.value) })}
+                                    placeholder="0"
+                                    autoFocus
+                                />
+                            </div>
+                            <div className="col-span-1 md:col-span-1">
+                                <label className="mb-2 block text-xs font-bold text-gray-500 uppercase tracking-tighter">Stems/Bun</label>
+                                <input
+                                    type="number"
+                                    readOnly
+                                    tabIndex={-1}
+                                    className="w-full rounded-lg border-2 border-primary/30 bg-primary/5 py-3 px-2 dark:bg-meta-4 outline-none text-lg font-bold text-center text-primary cursor-not-allowed"
+                                    value={newLine.stems_per_bunch}
+                                />
+                            </div>
+                            <div className="col-span-1 md:col-span-1">
+                                <label className="mb-2 block text-xs font-bold text-gray-500 uppercase tracking-tighter">Bun/Box</label>
+                                <input
+                                    type="number"
+                                    readOnly
+                                    tabIndex={-1}
+                                    className="w-full rounded-lg border-2 border-primary/30 bg-primary/5 py-3 px-2 dark:bg-meta-4 outline-none text-lg font-bold text-center text-primary cursor-not-allowed"
+                                    value={newLine.bunches_per_box}
+                                />
+                            </div>
+
+                            {/* Precios */}
+                            <div className="col-span-2 md:col-span-2">
+                                <label className="mb-2 block text-xs font-black text-success uppercase tracking-wider">Precio Unitario</label>
+                                <div className="relative group">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg group-focus-within:text-success transition-colors">{monedaSimbolo}</span>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        className="w-full rounded-lg border-2 border-stroke bg-white py-3 pl-8 pr-4 dark:bg-boxdark focus:border-success focus:ring-4 focus:ring-success/10 outline-none text-xl font-black text-success transition-all shadow-sm"
+                                        value={newLine.precio_unitario}
+                                        onChange={(e) => setNewLine({ ...newLine, precio_unitario: Number(e.target.value) })}
+                                        placeholder="0.00"
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-span-2 md:col-span-2">
+                                <label className="mb-2 block text-xs font-black text-gray-500 uppercase tracking-wider">P. Prov</label>
+                                <div className="relative group">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg group-focus-within:text-primary transition-colors">{monedaSimbolo}</span>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        className="w-full rounded-lg border-2 border-stroke bg-white py-3 pl-8 pr-4 dark:bg-boxdark focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none text-xl font-black text-gray-700 dark:text-white transition-all shadow-sm"
+                                        value={newLine.precio_proveedor}
+                                        onChange={(e) => setNewLine({ ...newLine, precio_proveedor: Number(e.target.value) })}
+                                        placeholder="0.00"
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-span-2 md:col-span-2">
+                                <label className="mb-2 block text-xs font-bold text-gray-500 uppercase tracking-tighter">IVA %</label>
+                                <input
+                                    type="number"
+                                    readOnly
+                                    tabIndex={-1}
+                                    className="w-full rounded-lg border-2 border-primary/30 bg-primary/5 py-3 px-2 dark:bg-meta-4 outline-none text-lg font-bold text-center text-primary cursor-not-allowed"
+                                    value={newLine.impuesto}
+                                />
+                            </div>
+
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4 pt-2">
+                            <div>
+                                <label className="mb-2 block text-xs font-bold text-black dark:text-white uppercase tracking-wide">
+                                    Especificaciones del Producto (Opción Libre)
+                                </label>
+                                <textarea
+                                    rows={2}
+                                    className="w-full rounded-lg border border-stroke bg-white py-3 px-4 dark:bg-boxdark focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-black dark:text-white transition-all shadow-sm resize-y"
+                                    value={newLine.especificaciones || ""}
+                                    onChange={(e) => setNewLine({ ...newLine, especificaciones: e.target.value })}
+                                    placeholder="Escriba aquí cualquier detalle adicional, instrucciones especiales o notas largas..."
+                                ></textarea>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-10 gap-6 pt-0">
+                            {/* Botón rápido */}
+                            <div className="col-span-2 md:col-span-2 flex items-end">
+                                {/* Placeholder or secondary action if needed */}
+                                <div className="w-full h-full flex items-center justify-center pt-6">
+                                    <span className="text-[10px] uppercase text-gray-400 font-bold tracking-widest text-center">
+                                        {newLine.cantidad > 0 ? `${newLine.cantidad.toLocaleString()} Tallos` : 'Ingrese Cajas'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Fila 5: Resumen Detallado y Acción Principal */}
+                        <div className="bg-gray-50 dark:bg-meta-4 p-6 rounded-xl border border-dashed border-gray-300 dark:border-strokedark mt-4">
+                            <h5 className="font-bold text-black dark:text-white uppercase text-xs tracking-widest mb-4 flex items-center gap-2">
+                                <span className="bg-gray-200 dark:bg-gray-700 text-[10px] px-2 py-0.5 rounded">Vista Previa</span>
+                                Detalles de la Línea
+                            </h5>
+
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                {/* Producto */}
+                                <div className="p-3 bg-white dark:bg-boxdark rounded-lg shadow-sm border border-stroke dark:border-strokedark">
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Producto</label>
+                                    <div className="text-sm font-bold text-black dark:text-white truncate">
+                                        {selectedProduct?.nombre || "—"} {selectedProduct?.tamano?.nombre ? `- ${selectedProduct.tamano.nombre}` : ""}
+                                    </div>
+                                    <div className="text-[10px] text-gray-500 truncate">{selectedProduct?.variante?.nombre}</div>
+                                </div>
+
+                                {/* Volumen */}
+                                <div className="p-3 bg-white dark:bg-boxdark rounded-lg shadow-sm border border-stroke dark:border-strokedark">
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Volumen</label>
+                                    <div className="text-sm font-black text-black dark:text-white">
+                                        {newLine.cajas} <span className="text-[10px] font-normal text-gray-500">Cajas</span>
+                                    </div>
+                                    <div className="text-[10px] text-gray-500 font-medium truncate">{newLine.empaque_nombre}</div>
+                                    <div className="text-[10px] text-gray-500">{(newLine.cantidad || 0).toLocaleString()} Tallos</div>
+                                </div>
+
+                                {/* Precio */}
+                                <div className="p-3 bg-white dark:bg-boxdark rounded-lg shadow-sm border border-stroke dark:border-strokedark">
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Precio Unit.</label>
+                                    <div className="text-sm font-black text-success">
+                                        {monedaSimbolo}{(newLine.precio_unitario || 0).toFixed(2)}
+                                    </div>
+                                    <div className="text-[10px] text-gray-500">Mas impuestos</div>
+                                </div>
+
+                                {/* Total Linea */}
+                                <div className="p-3 bg-primary/5 dark:bg-primary/20 rounded-lg shadow-sm border border-primary/20">
+                                    <label className="block text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Total Estimado</label>
+                                    <div className="text-lg font-black text-primary">
+                                        {monedaSimbolo}{((newLine.cantidad || 0) * (newLine.precio_unitario || 0)).toFixed(2)}
+                                    </div>
+                                    <div className="text-[10px] text-primary/70">Subtotal Línea</div>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end gap-4 w-full">
+                                {selectedProduct && selectedProduct.variante.nombre.toUpperCase().includes("ASSORTED") && (
                                     <button
-                                        onClick={cancelEdit}
-                                        className="rounded-lg border-2 border-stroke bg-white px-8 py-3 font-bold text-black hover:bg-gray-100 dark:border-strokedark dark:bg-boxdark dark:text-white transition-all text-xs uppercase tracking-widest"
+                                        onClick={() => setIsAssortedModalOpen(true)}
+                                        className={`px-4 py-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 border-2 transition-all uppercase tracking-wider ${newLine.assorted_config && newLine.assorted_config.length > 0
+                                            ? 'bg-success/10 text-success border-success'
+                                            : 'bg-warning/10 text-warning border-warning animate-pulse'
+                                            }`}
                                     >
-                                        Cancelar
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                                        {newLine.assorted_config && newLine.assorted_config.length > 0 ? 'Surtido Configurado' : 'Configurar Surtido'}
                                     </button>
+                                )}
+                                {isEditing !== null ? (
+                                    <>
+                                        <button
+                                            onClick={cancelEdit}
+                                            className="rounded-lg border-2 border-stroke bg-white px-8 py-3 font-bold text-black hover:bg-gray-100 dark:border-strokedark dark:bg-boxdark dark:text-white transition-all text-xs uppercase tracking-widest"
+                                        >
+                                            Cancelar
+                                        </button>
+                                        <button
+                                            onClick={handleAction}
+                                            className="rounded-lg bg-primary px-10 py-3 font-black text-white hover:bg-opacity-90 shadow-lg shadow-primary/20 transition-all text-sm uppercase tracking-wider"
+                                        >
+                                            Actualizar Línea
+                                        </button>
+                                    </>
+                                ) : (
                                     <button
                                         onClick={handleAction}
-                                        className="rounded-lg bg-primary px-10 py-3 font-black text-white hover:bg-opacity-90 shadow-lg shadow-primary/20 transition-all text-sm uppercase tracking-wider"
+                                        className="w-full md:w-auto rounded-lg bg-green-600 px-12 py-4 font-black text-white hover:bg-green-700 shadow-xl shadow-green-700/20 border-b-4 border-green-800 active:border-b-0 active:translate-y-1 transition-all text-sm uppercase tracking-[0.15em] flex items-center justify-center gap-3"
                                     >
-                                        Actualizar Línea
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        AGREGAR A LA LISTA
                                     </button>
-                                </>
-                            ) : (
-                                <button
-                                    onClick={handleAction}
-                                    className="w-full md:w-auto rounded-lg bg-green-600 px-12 py-4 font-black text-white hover:bg-green-700 shadow-xl shadow-green-700/20 border-b-4 border-green-800 active:border-b-0 active:translate-y-1 transition-all text-sm uppercase tracking-[0.15em] flex items-center justify-center gap-3"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                    AGREGAR A LA LISTA
-                                </button>
-                            )}
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            {/* Tabla de Lineas */}
+            )} {/* Tabla de Lineas */}
             <div className="max-w-full overflow-x-auto">
                 <table className="w-full table-auto">
                     <thead>
@@ -872,10 +873,20 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
                                     <td className="py-4 px-4 font-extrabold text-primary text-xs text-right">{monedaSimbolo}{lineTotal.toFixed(2)}</td>
                                     <td className="py-4 px-4 text-right">
                                         <div className="flex justify-end gap-2">
-                                            <button onClick={() => editLine(idx)} className="text-primary hover:text-white hover:bg-primary p-1 rounded transition-colors" title="Editar">
+                                            <button
+                                                onClick={() => !isReadOnly && editLine(idx)}
+                                                disabled={isReadOnly}
+                                                className={`p-1 rounded transition-colors ${isReadOnly ? 'text-gray-400 cursor-not-allowed' : 'text-primary hover:text-white hover:bg-primary'}`}
+                                                title="Editar"
+                                            >
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                                             </button>
-                                            <button onClick={() => removeLine(idx)} className="text-danger hover:text-white hover:bg-danger p-1 rounded transition-colors" title="Eliminar">
+                                            <button
+                                                onClick={() => !isReadOnly && removeLine(idx)}
+                                                disabled={isReadOnly}
+                                                className={`p-1 rounded transition-colors ${isReadOnly ? 'text-gray-400 cursor-not-allowed' : 'text-danger hover:text-white hover:bg-danger'}`}
+                                                title="Eliminar"
+                                            >
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                                             </button>
                                         </div>

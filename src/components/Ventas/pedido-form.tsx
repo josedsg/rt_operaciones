@@ -305,9 +305,9 @@ export function PedidoForm({ pedidoId }: PedidoFormProps) {
                             <button
                                 onClick={handleConfirm}
                                 disabled={loading}
-                                className="rounded bg-success px-6 py-2 font-medium text-white hover:bg-opacity-90 disabled:opacity-50"
+                                className="rounded bg-green-600 px-8 py-3 font-bold text-white hover:bg-green-700 shadow-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:scale-100"
                             >
-                                {loading ? "Procesando..." : "Confirmar y Finalizar"}
+                                {loading ? "Procesando..." : "CONFIRMAR Y FINALIZAR 🚀"}
                             </button>
                         )}
                     </div>
