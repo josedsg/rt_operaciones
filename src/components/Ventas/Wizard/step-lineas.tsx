@@ -5,6 +5,7 @@ import { Combobox } from "@/components/ui/Combobox";
 import { PedidoVentaInput, LineaPedidoInput, getProveedoresAction, ConfiguracionAssortedInput } from "@/actions/ventas";
 import { getFamiliasAction } from "@/actions/familias";
 import { getProductosMaestrosAction, ProductoMaestroWithRelations } from "@/actions/productos-maestros";
+import { getClienteByIdAction } from "@/actions/clientes";
 import { getProductosByProveedorAction } from "@/actions/proveedores";
 import { getEmpaquesAction } from "@/actions/empaques";
 import { Familia, Proveedor } from "@prisma/client";
@@ -22,6 +23,7 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
     const [familias, setFamilias] = useState<Familia[]>([]);
     const [allProductos, setAllProductos] = useState<ProductoMaestroWithRelations[]>([]);
     const [empaques, setEmpaques] = useState<any[]>([]);
+    const [currentCliente, setCurrentCliente] = useState<any>(null);
 
     const monedaSimbolo = data.moneda === 'CRC' ? '₡' : '$';
 
@@ -74,10 +76,7 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
         return list;
     }, [empaques]);
 
-    const filteredEmpaques = useMemo(() => {
-        if (!selectedTipoEmpaque) return empaques;
-        return empaques.filter(e => e.tipo_empaque_id === selectedTipoEmpaque);
-    }, [empaques, selectedTipoEmpaque]);
+
 
     // ...
 
@@ -240,6 +239,30 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
     const selectedProduct = useMemo(() => {
         return allProductos.find(p => p.id === newLine.producto_id) || null;
     }, [allProductos, newLine.producto_id]);
+
+    const filteredEmpaques = useMemo(() => {
+        let available = empaques;
+
+        // 1. Client Restrictions
+        if (currentCliente?.allowed_empaques?.length > 0) {
+            const allowedIds = new Set(currentCliente.allowed_empaques.map((ae: any) => ae.empaque_id));
+            available = available.filter(e => allowedIds.has(e.id));
+        }
+
+        // 2. Product Restrictions
+        const productAllowed = selectedProduct?.allowed_empaques;
+        if (productAllowed && productAllowed.length > 0) {
+            const allowedIds = new Set(productAllowed.map((ae: any) => ae.empaque_id));
+            available = available.filter(e => allowedIds.has(e.id));
+        }
+
+        // 3. Filter by Type (UI)
+        if (selectedTipoEmpaque) {
+            available = available.filter(e => e.tipo_empaque_id === selectedTipoEmpaque);
+        }
+
+        return available;
+    }, [empaques, selectedTipoEmpaque, currentCliente, selectedProduct]);
 
     // Reset product when familia changes
     useEffect(() => {
@@ -549,6 +572,7 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
                                     if (emp) {
                                         setNewLine(prev => ({
                                             ...prev,
+                                            empaque_id: eid,
                                             stems_per_bunch: emp.sxb,
                                             bunches_per_box: emp.bxb,
                                             empaque_nombre: emp.nombre
@@ -556,6 +580,7 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
                                     } else {
                                         setNewLine(prev => ({
                                             ...prev,
+                                            empaque_id: 0,
                                             stems_per_bunch: 0,
                                             bunches_per_box: 0,
                                             empaque_nombre: ""
@@ -967,7 +992,7 @@ export function StepLineas({ data, updateData }: StepLineasProps) {
                         onClose={() => setIsAssortedModalOpen(false)}
                         variantesDisponibles={availableVariantes}
                         initialConfig={newLine.assorted_config}
-                        totalTarget={newLine.cantidad || 0}
+                        totalTarget={newLine.stems_per_box || 0}
                         onSave={(config) => setNewLine(prev => ({ ...prev, assorted_config: config }))}
                     />
                 )}

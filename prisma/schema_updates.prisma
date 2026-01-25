@@ -1,0 +1,26 @@
+
+model ProductoEmpaque {
+  id                 Int             @id @default(autoincrement())
+  producto_id        Int
+  producto           ProductoMaestro @relation(fields: [producto_id], references: [id], onDelete: Cascade)
+  empaque_id         Int
+  empaque            Empaque         @relation(fields: [empaque_id], references: [id], onDelete: Cascade)
+  
+  fecha_creacion     DateTime?       @default(now())
+
+  @@unique([producto_id, empaque_id])
+  @@map("productos_empaques")
+}
+
+model ClienteEmpaque {
+  id                 Int             @id @default(autoincrement())
+  cliente_id         Int
+  cliente            Cliente         @relation(fields: [cliente_id], references: [id], onDelete: Cascade)
+  empaque_id         Int
+  empaque            Empaque         @relation(fields: [empaque_id], references: [id], onDelete: Cascade)
+  
+  fecha_creacion     DateTime?       @default(now())
+
+  @@unique([cliente_id, empaque_id])
+  @@map("clientes_empaques")
+}

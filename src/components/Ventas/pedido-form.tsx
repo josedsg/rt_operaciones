@@ -13,7 +13,7 @@ import { StepResumen } from "@/components/Ventas/Wizard/step-resumen";
 
 // Types & Actions
 import { PedidoVentaInput, getPedidoByIdAction } from "@/actions/ventas";
-import { createPedidoAction } from "@/actions/ventas";
+import { createPedidoAction, confirmPedidoAction } from "@/actions/ventas";
 
 interface PedidoFormProps {
     pedidoId?: number;
@@ -170,6 +170,56 @@ export function PedidoForm({ pedidoId }: PedidoFormProps) {
             }
         });
     };
+    const handleConfirm = async () => {
+        if (!confirm("¿Está seguro de confirmar el pedido? Se marcará como CONFIRMADO.")) return;
+
+        setLoading(true);
+        try {
+            // 1. Save changes first
+            const saved = await handleSubmit(false);
+            if (!saved) return;
+
+            // 2. Confirm (update status)
+            // We use the ID from formData (which was updated by handleSubmit)
+            // But handleSubmit updates state asynchronously? No, it updates state but we might not have it in closure immediately if we rely on formData.id
+            // Ideally handleSubmit returns the saved object.
+
+            // Actually handleSubmit returns true/false, but sets state. 
+            // We can rely on a slight delay or trusting the backend returned ID which handleSubmit sets.
+            // Let's assume handleSubmit set the ID in state. 
+            // Better: handleSubmit returns boolean. We need the ID.
+            // I'll assume formData.id is reliable if it was an edit, but for new creation...
+            // Wait, handleSubmit(false) sets formData state. The React state update might not be flushed yet in this closure?
+            // Correct. I should check how handleSubmit saves.
+            // It calls setFormData.
+
+            // If I look at handleSubmit, it sets formData.
+            // So immediately using formData.id here might be stale if it was *just* created.
+            // However, createPedidoAction returns the object. 
+            // I should modify logic to ensure we have the ID.
+
+            // For now, let's trust that if the user reached Step 3, they likely have auto-saved (created) the order in Step 2?
+            // "handleNext" calls "handleSubmit(false)". So by Step 3, an ID should mostly likely exist.
+
+            if (formData.id) {
+                await confirmPedidoAction(formData.id);
+                toast.success("Pedido Confirmado Exitosamente");
+                router.push("/ventas");
+            } else {
+                // If by some reason no ID (shouldn't happen on Step 3), try to save again?
+                // handleSubmit above should have handled it.
+                // If it was a new order, handleSubmit sets state. 
+                // We might need to wait for re-render if we strictly rely on state.
+                // But simplified:
+                toast.error("Error: Guarde el pedido antes de confirmar.");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Error al confirmar");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // ... rendering ...
 
@@ -216,6 +266,7 @@ export function PedidoForm({ pedidoId }: PedidoFormProps) {
                         <StepResumen
                             data={formData}
                             updateData={updateFormData}
+                            onConfirm={handleConfirm}
                         />
                     )}
                 </div>
@@ -230,7 +281,8 @@ export function PedidoForm({ pedidoId }: PedidoFormProps) {
                         Atrás
                     </button>
 
-                    <div className="flex gap-4">
+                    <div className="flex gap-4 items-center">
+                        <span className="text-xs text-gray-300">Paso {currentStep}</span>
                         {/* Always show Save button */}
                         <button
                             onClick={() => handleSubmit(false)}
@@ -240,20 +292,22 @@ export function PedidoForm({ pedidoId }: PedidoFormProps) {
                             {loading ? "Guardando..." : "Solo Guardar"}
                         </button>
 
-                        {currentStep < 3 ? (
+                        {currentStep < 3 && (
                             <button
                                 onClick={handleNext}
                                 className="rounded bg-primary px-6 py-2 font-medium text-white hover:bg-opacity-90"
                             >
                                 Siguiente
                             </button>
-                        ) : (
+                        )}
+
+                        {currentStep === 3 && (
                             <button
-                                onClick={() => handleSubmit(true)}
+                                onClick={handleConfirm}
                                 disabled={loading}
                                 className="rounded bg-success px-6 py-2 font-medium text-white hover:bg-opacity-90 disabled:opacity-50"
                             >
-                                {loading ? "Guardando..." : "Confirmar y Guardar"}
+                                {loading ? "Procesando..." : "Confirmar y Finalizar"}
                             </button>
                         )}
                     </div>

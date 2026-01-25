@@ -112,6 +112,9 @@ export async function getClienteByIdAction(id: number) {
                 provincia: true,
                 canton: true,
                 distrito: true,
+                allowed_empaques: {
+                    include: { empaque: true }
+                }
             },
         });
     } catch (error) {
@@ -123,8 +126,10 @@ export async function getClienteByIdAction(id: number) {
 export async function createClienteAction(data: any) {
     try {
         // Ensure relations are integers
+        const { empaques, ...cleanData } = data;
+
         const formattedData = {
-            ...toUpperCaseFields(data),
+            ...toUpperCaseFields(cleanData),
             tipo_identificacion_id: Number(data.tipo_identificacion_id),
             tipo_cliente_id: Number(data.tipo_cliente_id),
             pais_id: Number(data.pais_id),
@@ -133,12 +138,29 @@ export async function createClienteAction(data: any) {
             distrito_id: Number(data.distrito_id) || null,
             terminos_pago_id: Number(data.terminos_pago_id),
             fecha_vencimiento_exoneracion: data.fecha_vencimiento_exoneracion ? new Date(data.fecha_vencimiento_exoneracion) : null,
-            tipo_facturacion: data.tipo_facturacion || "GRAVADO"
+            tipo_facturacion: data.tipo_facturacion || "GRAVADO",
+            agencia: data.agencia || null,
+            terminal: data.terminal || null
         };
 
-        const cliente = await prisma.cliente.create({
-            data: formattedData,
+        const empaques_ids = data.empaques ? data.empaques.map(Number) : [];
+
+        const cliente = await prisma.$transaction(async (tx) => {
+            const newCliente = await tx.cliente.create({
+                data: formattedData,
+            });
+
+            if (empaques_ids.length > 0) {
+                await tx.clienteEmpaque.createMany({
+                    data: empaques_ids.map((eid: number) => ({
+                        cliente_id: newCliente.id,
+                        empaque_id: eid
+                    }))
+                });
+            }
+            return newCliente;
         });
+
         revalidatePath("/clientes");
         return cliente;
     } catch (error) {
@@ -160,8 +182,10 @@ export async function deleteClienteAction(id: number) {
 
 export async function updateClienteAction(id: number, data: any) {
     try {
+        const { empaques, ...cleanData } = data;
+
         const formattedData = {
-            ...toUpperCaseFields(data),
+            ...toUpperCaseFields(cleanData),
             tipo_identificacion_id: Number(data.tipo_identificacion_id),
             tipo_cliente_id: Number(data.tipo_cliente_id),
             pais_id: Number(data.pais_id),
@@ -170,12 +194,34 @@ export async function updateClienteAction(id: number, data: any) {
             distrito_id: Number(data.distrito_id) || null,
             terminos_pago_id: Number(data.terminos_pago_id),
             fecha_vencimiento_exoneracion: data.fecha_vencimiento_exoneracion ? new Date(data.fecha_vencimiento_exoneracion) : null,
-            tipo_facturacion: data.tipo_facturacion || "GRAVADO"
+            tipo_facturacion: data.tipo_facturacion || "GRAVADO",
+            agencia: data.agencia || null,
+            terminal: data.terminal || null
         };
 
-        const cliente = await prisma.cliente.update({
-            where: { id },
-            data: formattedData,
+        const empaques_ids = data.empaques ? data.empaques.map(Number) : [];
+
+        // Transaction for Update + Relations
+        const cliente = await prisma.$transaction(async (tx) => {
+            const c = await tx.cliente.update({
+                where: { id },
+                data: formattedData,
+            });
+
+            // Sync Allowed Empaques
+            await tx.clienteEmpaque.deleteMany({
+                where: { cliente_id: id }
+            });
+
+            if (empaques_ids.length > 0) {
+                await tx.clienteEmpaque.createMany({
+                    data: empaques_ids.map((eid: number) => ({
+                        cliente_id: id,
+                        empaque_id: eid
+                    }))
+                });
+            }
+            return c;
         });
         revalidatePath("/clientes");
         return cliente;

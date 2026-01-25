@@ -15,7 +15,10 @@ export default async function EditarClientePage({ params }: EditarClientePagePro
 
     return (
         <>
-            <Breadcrumb pageName="Editar Cliente" />
+            <Breadcrumb
+                pageName="Editar Cliente"
+                parentName="Riotapezco-Operaciones"
+            />
 
             <div className="mx-auto max-w-270">
                 <ClienteForm clienteId={parseInt(id)} />

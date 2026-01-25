@@ -168,6 +168,32 @@ export function Authentication(props: PropsType) {
   );
 }
 
+export function Settings(props: PropsType) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      fill="none"
+      {...props}
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M10.5 3a1.5 1.5 0 00-1.333.866l-.503.953a.75.75 0 01-.354.354l-.953.503a1.5 1.5 0 000 2.648l.953.503a.75.75 0 01.354.354l.503.953a1.5 1.5 0 002.666 0l.503-.953a.75.75 0 01.354-.354l.953-.503a1.5 1.5 0 000-2.648l-.953-.503a.75.75 0 01-.354-.354l-.503-.953A1.5 1.5 0 0010.5 3zm-2.06 2.245a3 3 0 015.12 0l.31.59c.045.085.132.138.228.138h.67a3 3 0 013 3v.67c0 .096.053.183.138.228l.59.31a3 3 0 010 5.12l-.59.31a.258.258 0 00-.138.228v.67a3 3 0 01-3 3h-.67a.258.258 0 00-.228.138l-.31.59a3 3 0 01-5.12 0l-.31-.59a.258.258 0 00-.228-.138h-.67a3 3 0 00-3-3v-.67a.258.258 0 00-.138-.228l-.59-.31a3 3 0 010-5.12l.59-.31a.258.258 0 00.138-.228v-.67a3 3 0 013-3h.67c.096 0 .183-.053.228-.138l.31-.59z"
+        fill="currentColor"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12 8.25a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5zM9.75 12a2.25 2.25 0 114.5 0 2.25 2.25 0 01-4.5 0z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 export function ArrowLeftIcon(props: PropsType) {
   return (
     <svg

@@ -97,6 +97,12 @@ export const NAV_DATA: { label: string; items: MenuItem[] }[] = [
     label: "Administración",
     items: [
       {
+        title: "Usuarios",
+        url: "/usuarios",
+        icon: Icons.User,
+        items: [],
+      },
+      {
         title: "Migración Mayúsculas",
         url: "/ventas/admin/migrate",
         icon: Icons.Table,
@@ -107,6 +113,18 @@ export const NAV_DATA: { label: string; items: MenuItem[] }[] = [
         url: "/ventas/admin/clear-db",
         icon: Icons.PieChart,
         items: [],
+      },
+      {
+        title: "Configuración General",
+        url: "#",
+        icon: Icons.Settings,
+        items: [
+          {
+            title: "Datos Empresa",
+            url: "/configuracion/empresa",
+            items: [],
+          }
+        ],
       },
     ],
   },

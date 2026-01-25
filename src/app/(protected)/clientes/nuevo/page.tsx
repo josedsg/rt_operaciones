@@ -9,7 +9,10 @@ export const metadata: Metadata = {
 export default function NuevoClientePage() {
     return (
         <>
-            <Breadcrumb pageName="Nuevo Cliente" />
+            <Breadcrumb
+                pageName="Nuevo Cliente"
+                parentName="Riotapezco-Operaciones"
+            />
 
             <div className="mx-auto max-w-270">
                 <ClienteForm />

@@ -241,9 +241,30 @@ export default function VentasPage() {
                                                 <button
                                                     onClick={() => setConfirmModal({ isOpen: true, id: pedido.id })}
                                                     className="hover:text-meta-1"
+                                                    title="Eliminar"
                                                 >
                                                     🗑️
                                                 </button>
+                                                {pedido.estado === "BORRADOR" && (
+                                                    <button
+                                                        onClick={async () => {
+                                                            if (!confirm("¿Confirmar pedido? Pasará a estado CONFIRMADO y estará listo para exportar.")) return;
+                                                            const toastId = toast.loading("Confirmando...");
+                                                            try {
+                                                                const { confirmPedidoAction } = await import("@/actions/ventas");
+                                                                await confirmPedidoAction(pedido.id);
+                                                                toast.success("Pedido confirmado", { id: toastId });
+                                                                fetchPedidos();
+                                                            } catch (error) {
+                                                                toast.error("Error al confirmar", { id: toastId });
+                                                            }
+                                                        }}
+                                                        className="hover:text-success text-success"
+                                                        title="Confirmar Pedido"
+                                                    >
+                                                        ✅
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>

@@ -1,24 +1,95 @@
 "use client";
 
-
-import { PedidoVentaInput, uploadInvoiceFilesAction } from "@/actions/ventas";
-import { useState } from "react";
+import { PedidoVentaInput, uploadInvoiceFilesAction, getCompanyConfigAction, getUsuariosAction } from "@/actions/ventas";
+import { getClienteByIdAction } from "@/actions/clientes";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import Image from "next/image";
 import logo from "@/assets/logos/rio-tapezco-logo.png";
+import { CompanyConfig, Usuario, Cliente, TerminosPago, Provincia, Pais, Canton, Distrito } from "@prisma/client";
 
 interface StepResumenProps {
     data: PedidoVentaInput;
     updateData: (data: Partial<PedidoVentaInput>) => void;
+    onConfirm?: () => void;
 }
 
-export function StepResumen({ data, updateData }: StepResumenProps) {
-    const [uploading, setUploading] = useState(false);
+type FullCliente = Cliente & {
+    terminos_pago: TerminosPago;
+    pais: Pais;
+    provincia: Provincia | null;
+    canton: Canton | null;
+    distrito: Distrito | null;
+};
 
-    // Derived values
+export function StepResumen({ data, updateData, onConfirm }: StepResumenProps) {
+    const [uploading, setUploading] = useState(false);
+    const [companyConfig, setCompanyConfig] = useState<CompanyConfig | null>(null);
+    const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+    const [clienteFull, setClienteFull] = useState<FullCliente | null>(null);
+
+    // --- Data Fetching ---
+    useEffect(() => {
+        const loadInitialData = async () => {
+            const config = await getCompanyConfigAction();
+            setCompanyConfig(config);
+
+            const users = await getUsuariosAction();
+            setUsuarios(users);
+        };
+        loadInitialData();
+    }, []);
+
+    useEffect(() => {
+        const loadCliente = async () => {
+            if (data.cliente_id) {
+                const c = await getClienteByIdAction(data.cliente_id);
+                // We cast or check if response matches FullCliente, assuming action returns relations
+                const fullC = c as unknown as FullCliente;
+                setClienteFull(fullC);
+
+                // Auto-load Agency/Terminal if empty
+                if (!data.agencia && (fullC as any).agencia) {
+                    updateData({ agencia: (fullC as any).agencia });
+                }
+                if (!data.terminal && (fullC as any).terminal) {
+                    updateData({ terminal: (fullC as any).terminal });
+                }
+            }
+        };
+        loadCliente();
+    }, [data.cliente_id]);
+
+    // --- Logic / Calculations ---
+
+    // Simulate Invoice Number if empty
+    useEffect(() => {
+        if (!data.numero_factura) {
+            // Generating simulated number: 0010000101 + random digits
+            const randomSuffix = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
+            const simNumber = `0010000101${randomSuffix}`;
+
+            // Only update if we want to auto-assign. 
+            updateData({
+                numero_factura: simNumber,
+            });
+        }
+    }, [data.numero_factura, updateData]);
+
+    const electronicKey = data.numero_factura ? `506${new Date().getFullYear()}${data.numero_factura.padEnd(40, '0')}`.substring(0, 50) : "";
+
     const monedaSimbolo = data.moneda === 'CRC' ? '₡' : '$';
 
-    // Cálculos
+    const fechaPedido = data.fecha_pedido instanceof Date ? data.fecha_pedido : new Date(data.fecha_pedido || Date.now());
+
+    // Payment Condition & Due Date
+    const paymentConditionName = clienteFull?.terminos_pago?.nombre || "N/A";
+    const paymentDays = clienteFull?.terminos_pago?.dias || 0;
+
+    const dueDate = new Date(fechaPedido);
+    dueDate.setDate(dueDate.getDate() + paymentDays);
+
+    // Totals
     const totalCajas = data.lineas.reduce((acc, l) => acc + (l.cajas || 0), 0);
     const totalCantidad = data.lineas.reduce((acc, l) => acc + (l.cantidad || 0), 0);
 
@@ -56,117 +127,187 @@ export function StepResumen({ data, updateData }: StepResumenProps) {
         <div className="flex flex-col gap-8 max-w-5xl mx-auto">
 
             {/* --- COMMERCIAL INVOICE PREVIEW --- */}
-            <div className="bg-white dark:bg-boxdark shadow-lg rounded-sm overflow-hidden border border-stroke dark:border-strokedark print:shadow-none print:border-none">
+            <div className="bg-white dark:bg-boxdark shadow-lg rounded-sm border border-stroke dark:border-strokedark print:shadow-none print:border-none">
 
                 {/* Header Logo & Title */}
                 <div className="p-8 pb-4">
                     <div className="flex justify-between items-start">
                         <div>
-                            {/* Logo Real */}
+                            {/* Logo: Changed to new Asset */}
                             <div className="flex items-center gap-2 mb-2">
-                                <div className="relative h-16 w-auto bg-[#1c2434] p-2 rounded-md print:bg-black">
-                                    <Image
-                                        src={logo}
+                                <div className="relative h-24 w-80">
+                                    <img
+                                        src="/assets/invoice/logo-header.jpg"
                                         alt="Rio Tapezco Logo"
-                                        className="h-full w-auto object-contain"
-                                        priority
+                                        className="h-full w-full object-contain object-left"
                                     />
                                 </div>
                             </div>
                         </div>
+                        <div className="text-right flex flex-col items-end gap-2">
+                            {/* Print Button (Hidden on Print) */}
+                            <button
+                                onClick={() => window.print()}
+                                className="print:hidden flex items-center gap-2 bg-primary text-white px-4 py-2 rounded shadow hover:bg-opacity-90 transition-all text-sm font-bold"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                                Guardar PDF / Imprimir
+                            </button>
+
+                            {/* Confirm Button */}
+                            <button
+                                onClick={onConfirm}
+                                disabled={!onConfirm}
+                                className={`print:hidden flex items-center gap-2 px-4 py-2 rounded shadow transition-all text-sm font-bold ${onConfirm ? "bg-success text-white hover:bg-opacity-90" : "bg-gray-300 text-gray-500 cursor-not-allowed"}`}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                {onConfirm ? "Confirmar Pedido" : "Confirmar (N/A)"}
+                            </button>
+
+                            {/* Electronic Key Display (Simulated) */}
+                            <div className="text-[10px] text-gray-500 font-mono text-right max-w-xs break-all">
+                                {electronicKey}
+                            </div>
+                        </div>
                     </div>
-                    <div className="mt-4">
-                        <h2 className="text-2xl font-bold text-[#167e35] uppercase tracking-wide">Comercial Invoice</h2>
+                    <div className="mt-4 flex justify-between items-end">
+                        <h2 className="text-2xl font-bold text-[#167e35] uppercase tracking-wide">Commercial Invoice</h2>
                     </div>
                 </div>
 
-                {/* Addresses Block (Gray Bg? Or just lines) - Reference image has light boxes */}
+                {/* Addresses Block */}
                 <div className="grid grid-cols-1 md:grid-cols-2 text-sm border-t border-b border-stroke dark:border-strokedark">
-                    {/* FROM */}
+                    {/* FROM (Issuer Data) */}
                     <div className="p-6 border-r border-stroke dark:border-strokedark">
                         <h3 className="font-bold text-[#167e35] mb-2 uppercase text-xs tracking-wider">From:</h3>
-                        <p className="font-bold text-black dark:text-white">RIO TAPEZCO</p>
-                        <p className="text-gray-600 dark:text-gray-300">3785 NW 82 ND Ave</p>
-                        <p className="text-gray-600 dark:text-gray-300">Doral, Florida 33166</p>
-                        <p className="text-gray-600 dark:text-gray-300">Estados Unidos</p>
-                        <div className="mt-2 text-gray-500 text-xs">
-                            <p>Phone: +506 2231 4946</p>
-                            <p>Email: accounts@riotapezco.com</p>
-                        </div>
+                        {companyConfig ? (
+                            <>
+                                <p className="font-bold text-black dark:text-white uppercase">{companyConfig.nombre}</p>
+                                <p className="text-gray-600 dark:text-gray-300 whitespace-pre-line">{companyConfig.direccion}</p>
+                                <div className="mt-2 text-gray-500 text-xs">
+                                    <p>Phone: {companyConfig.telefono}</p>
+                                    <p>Email: {companyConfig.email}</p>
+                                    {companyConfig.website && <p>{companyConfig.website}</p>}
+                                </div>
+                            </>
+                        ) : (
+                            <p className="text-gray-400 italic">Load Company Config...</p>
+                        )}
                     </div>
 
                     {/* TO (Customer Data) */}
                     <div className="p-6 bg-gray-50 dark:bg-meta-4/20">
                         <h3 className="font-bold text-[#167e35] mb-2 uppercase text-xs tracking-wider">Customer Data:</h3>
-                        {data.cliente_id ? (
+                        {clienteFull ? (
                             <>
-                                <p className="font-bold text-black dark:text-white uppercase">{/* We need client name here, data only has ID in input but form probably has access... actually StepResumen receives PedidoVentaInput. Ideally we'd have the client object. 
-                                For now we display 'Cliente #' or pass client name if available. 
-                                Wait, PedidoForm had `data` which might only contain ID. 
-                                Let's assume for this preview we might need to fetch or passed down. 
-                                Checking Component Props... StepResumenProps data: PedidoVentaInput. 
-                                We might miss client name here if not populated. 
-                                However, user experience: they just selected it. 
-                                Let's check if we can get it from an API or if we should just show generic.
-                                Re-reading previous step logic: StepEncabezado selects it.
-                                We will display "Cliente Ref: {data.cliente_id}" if name missing, 
-                                BUT usually we want the name. 
-                                The user state in PedidoForm loads full object on Edit.
-                                Let's try to simulate or leave placeholder if strict type. Use 'Cliente Seleccionado' */}
-                                    CLIENTE ID: {data.cliente_id}
+                                {/* Electronic Key Display (Simulated) */}
+                                <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 print:hidden">
+                                    <p className="text-xs text-gray-500 mb-1">Clave Numérica (Electronic Key) - 50 dígitos</p>
+                                    <p className="font-mono text-xs break-all tracking-widest text-gray-800 dark:text-gray-200">
+                                        50624000000000000000000000000000000000000000000000
+                                    </p>
+                                </div>
+                                <p className="font-bold text-black dark:text-white uppercase">
+                                    {clienteFull.nombre_comercial || clienteFull.nombre}
                                 </p>
-                                <p className="text-gray-600 dark:text-gray-300">Dirección del Cliente...</p>
-                                <p className="text-gray-600 dark:text-gray-300">Ciudad, País</p>
+                                <p className="text-gray-600 dark:text-gray-300">
+                                    {clienteFull.direccion || "No address on file"}
+                                </p>
+                                <p className="text-gray-600 dark:text-gray-300">
+                                    {clienteFull.distrito?.nombre}, {clienteFull.canton?.nombre}, {clienteFull.provincia?.nombre}
+                                </p>
+                                <p className="text-gray-600 dark:text-gray-300">
+                                    {clienteFull.pais?.nombre}
+                                </p>
+                                <div className="mt-2 text-gray-500 text-xs">
+                                    <p>Phone: {clienteFull.telefono || "N/A"}</p>
+                                    <p>Email: {clienteFull.email_notificacion || "N/A"}</p>
+                                </div>
                             </>
                         ) : (
-                            <p className="text-danger italic">Cliente no seleccionado</p>
+                            <p className="text-danger italic">Select a Client in Step 1</p>
                         )}
-                        <div className="mt-2 text-gray-500 text-xs">
-                            <p>Phone: ...</p>
-                            <p>Email: ...</p>
-                        </div>
                     </div>
                 </div>
 
-                {/* Invoice Meta Grid (Green Headers) */}
+                {/* Invoice Meta Grid */}
                 <div className="grid grid-cols-3 text-center border-b border-stroke dark:border-strokedark">
                     <div className="border-r border-stroke dark:border-strokedark">
-                        <div className="bg-[#167e35] text-white font-bold text-xs uppercase py-1">Invoice</div>
-                        <div className="py-2 text-sm font-bold text-danger">{data.numero_factura || "BORRADOR"}</div>
+                        <div className="bg-[#167e35] text-white font-bold text-xs uppercase py-1">Invoice (Clave)</div>
+                        {/* Changed to show Electronic Key as requested */}
+                        <div className="py-2 text-[10px] font-bold text-danger break-all px-2 leading-tight">
+                            {electronicKey || data.numero_factura || "DRAFT"}
+                        </div>
                     </div>
                     <div className="border-r border-stroke dark:border-strokedark">
                         <div className="bg-[#167e35] text-white font-bold text-xs uppercase py-1">Date</div>
                         <div className="py-2 text-sm font-medium">
-                            {data.fecha_pedido instanceof Date
-                                ? data.fecha_pedido.toLocaleDateString()
-                                : new Date(data.fecha_pedido || Date.now()).toLocaleDateString()}
+                            {fechaPedido.toLocaleDateString('en-US')}
                         </div>
                     </div>
                     <div>
-                        <div className="bg-[#167e35] text-white font-bold text-xs uppercase py-1">AWD</div>
+                        <div className="bg-[#167e35] text-white font-bold text-xs uppercase py-1">AWB</div>
                         <div className="py-2 text-sm font-medium">{data.awd || "—"}</div>
                     </div>
                 </div>
 
-                {/* Salesperson & Terms (Green Headers) */}
-                <div className="grid grid-cols-3 text-center border-b border-stroke dark:border-strokedark mt-4 mx-4 border-l border-r">
-                    <div className="border-r border-stroke dark:border-strokedark">
-                        <div className="bg-[#167e35] text-white font-bold text-xs uppercase py-1">Salesperson</div>
-                        <div className="py-2 text-sm">Melissa Hernandez</div>
+                {/* Shipping & Payment Grids */}
+                <div className="grid grid-cols-2 mt-4 mx-4 gap-4">
+                    {/* Left: Shipping Data (Editable Inputs) */}
+                    <div className="border border-stroke dark:border-strokedark rounded">
+                        <div className="bg-[#167e35] text-white font-bold text-xs uppercase py-1 text-center">Shipping Data</div>
+                        <div className="p-2 space-y-2">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold w-16">Agency:</span>
+                                <input
+                                    type="text"
+                                    className="flex-1 text-xs border-b border-gray-300 outline-none p-1 bg-transparent"
+                                    placeholder="Agency Name"
+                                    value={data.agencia || ""}
+                                    onChange={(e) => updateData({ agencia: e.target.value })}
+                                />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold w-16">Terminal:</span>
+                                <input
+                                    type="text"
+                                    className="flex-1 text-xs border-b border-gray-300 outline-none p-1 bg-transparent"
+                                    placeholder="Terminal Info"
+                                    value={data.terminal || ""}
+                                    onChange={(e) => updateData({ terminal: e.target.value })}
+                                />
+                            </div>
+                        </div>
                     </div>
-                    <div className="border-r border-stroke dark:border-strokedark">
-                        <div className="bg-[#167e35] text-white font-bold text-xs uppercase py-1">Payment Condition</div>
-                        <div className="py-2 text-sm">45 días</div>
-                    </div>
-                    <div>
-                        <div className="bg-[#167e35] text-white font-bold text-xs uppercase py-1">Due Date</div>
-                        <div className="py-2 text-sm">
-                            {/* Dummy calculation: date + 45 */}
-                            {(() => {
-                                const d = data.fecha_pedido instanceof Date ? new Date(data.fecha_pedido) : new Date(data.fecha_pedido || Date.now());
-                                d.setDate(d.getDate() + 45);
-                                return d.toLocaleDateString();
-                            })()}
+
+                    {/* Right: Payment Details */}
+                    <div className="grid grid-cols-3 border border-stroke dark:border-strokedark rounded overflow-hidden">
+                        <div className="border-r border-stroke dark:border-strokedark flex flex-col">
+                            <div className="bg-[#167e35] text-white font-bold text-xs uppercase py-1 text-center">Salesperson</div>
+                            <div className="flex-1 flex items-center justify-center p-1">
+                                <select
+                                    className="text-xs text-center w-full bg-transparent outline-none h-full"
+                                    value={data.usuario_id || ""}
+                                    onChange={(e) => updateData({ usuario_id: Number(e.target.value) })}
+                                >
+                                    <option value="">Select User</option>
+                                    {usuarios.map(u => (
+                                        <option key={u.id} value={u.id}>{u.nombre}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="border-r border-stroke dark:border-strokedark flex flex-col">
+                            <div className="bg-[#167e35] text-white font-bold text-xs uppercase py-1 text-center">Payment Condition</div>
+                            <div className="flex-1 flex items-center justify-center text-xs font-medium p-2">
+                                {paymentConditionName}
+                            </div>
+                        </div>
+                        <div className="flex flex-col">
+                            <div className="bg-[#167e35] text-white font-bold text-xs uppercase py-1 text-center">Due Date</div>
+                            <div className="flex-1 flex items-center justify-center text-xs font-medium p-2">
+                                {dueDate.toLocaleDateString('en-US')}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -189,13 +330,14 @@ export function StepResumen({ data, updateData }: StepResumenProps) {
                             {data.lineas.map((linea, key) => (
                                 <tr key={key}>
                                     <td className="border border-stroke dark:border-strokedark px-2 py-2 text-xs text-black dark:text-white">
-                                        <div className="font-bold">{linea.producto_nombre} {linea.tamano_nombre ? `- ${linea.tamano_nombre}` : ""}</div>
-                                        <div className="text-[10px] text-gray-500 uppercase">{linea.variante_nombre} {linea.empaque_nombre ? `/ ${linea.empaque_nombre}` : ""}</div>
+                                        {/* Description Format: [Product] + [Empaque] + [Variant] + [Size] */}
+                                        <div className="font-bold">
+                                            {linea.producto_nombre} - {linea.empaque_nombre} - {linea.variante_nombre} {linea.tamano_nombre}
+                                        </div>
                                     </td>
                                     <td className="border border-stroke dark:border-strokedark px-1 py-1 text-center text-xs">{linea.po || "—"}</td>
                                     <td className="border border-stroke dark:border-strokedark px-1 py-1 text-center text-xs font-semibold">
                                         {linea.cajas}
-                                        <div className="text-[9px] font-normal text-gray-500">{linea.empaque_nombre}</div>
                                     </td>
                                     <td className="border border-stroke dark:border-strokedark px-1 py-1 text-center text-xs">{linea.stems_per_box}</td>
                                     <td className="border border-stroke dark:border-strokedark px-1 py-1 text-center text-xs font-bold">{linea.cantidad}</td>
@@ -216,8 +358,18 @@ export function StepResumen({ data, updateData }: StepResumenProps) {
                         </tbody>
                     </table>
 
-                    {/* Financial Footer */}
-                    <div className="flex justify-end mt-0">
+                    {/* Breakdown & Hardcoded Section */}
+                    <div className="flex justify-between mt-0">
+                        {/* Left: Hardcoded Section (Cinebtarui / Note) */}
+                        <div className="p-4 text-[10px] text-gray-500 w-1/2">
+                            <p className="font-bold mb-1">CINEBTARUI (NOTES):</p>
+                            <p>
+                                Fixed section content. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                                Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                            </p>
+                        </div>
+
+                        {/* Right: Financials */}
                         <div className="w-64 border-l border-r border-b border-stroke dark:border-strokedark">
                             {/* Subtotal */}
                             <div className="flex border-b border-stroke dark:border-strokedark">
@@ -243,24 +395,44 @@ export function StepResumen({ data, updateData }: StepResumenProps) {
                     </div>
                 </div>
 
-                {/* Footer Legal */}
-                <div className="p-4 border-t border-stroke dark:border-strokedark text-[10px] text-gray-500 flex justify-between">
-                    <div>
-                        <p>+506 2231 4946 info@riotapezco.com RIO TAPEZCO CORP</p>
-                        <p>http://riotapezco.com/ EIN 33-Miami FL Estados Unidos</p>
+                {/* Footer Legal & Banner */}
+                <div className="p-0 border-t border-stroke dark:border-strokedark">
+                    {/* Legal Text */}
+                    <div className="p-4 flex justify-between items-end pb-2">
+                        <div className="text-[10px] text-gray-500">
+                            {companyConfig ? (
+                                <>
+                                    <p>{companyConfig.telefono} {companyConfig.email} {companyConfig.nombre?.toUpperCase()}</p>
+                                    <p>{companyConfig.website} {companyConfig.ein_number}</p>
+                                </>
+                            ) : (
+                                <p>Loading footer info...</p>
+                            )}
+                        </div>
+                        {/* Signature Box (Fixed/Static) */}
+                        <div className="w-40 border-t border-black text-center">
+                            <p className="text-[10px] uppercase font-bold mt-1">Authorized Signature</p>
+                        </div>
                     </div>
-                    <div className="bg-[#8ca892] text-white h-6 w-6 flex items-center justify-center font-bold rounded">1</div>
+                    {/* Footer Banner */}
+                    <div className="w-full">
+                        <img
+                            src="/assets/invoice/footer-banner.png"
+                            alt="Footer Banner"
+                            className="w-full h-auto object-cover"
+                        />
+                    </div>
                 </div>
-
             </div>
 
-            {/* --- ELECTRONIC INVOICE MANAGEMENT --- */}
-            <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5">
+
+            {/* --- ELECTRONIC INVOICE MANAGEMENT (Keep in Spanish as it is internal control) --- */}
+            <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 print:hidden">
                 <div className="flex items-center gap-3 mb-6 border-b border-stroke dark:border-strokedark pb-2">
                     <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-primary">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></svg>
                     </div>
-                    <h4 className="text-xl font-bold text-black dark:text-white">Factura Electrónica</h4>
+                    <h4 className="text-xl font-bold text-black dark:text-white">Factura Electrónica (Control Interno)</h4>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
@@ -294,7 +466,7 @@ export function StepResumen({ data, updateData }: StepResumenProps) {
                         </div>
                     </div>
 
-                    {/* File Uploads */}
+                    {/* File Uploads (Keep logic) */}
                     <div className="space-y-4">
                         <label className="mb-1 block text-xs font-bold text-gray-500 uppercase">Archivos XML / PDF</label>
 
@@ -352,6 +524,7 @@ export function StepResumen({ data, updateData }: StepResumenProps) {
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>

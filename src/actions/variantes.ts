@@ -3,7 +3,6 @@
 import { prisma } from "@/lib/prisma";
 import { Variante } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { toUpperCaseFields } from "@/lib/utils";
 
 export type GetVariantesParams = {
     page?: number;
@@ -99,5 +98,25 @@ export async function deleteVarianteAction(id: number): Promise<void> {
     } catch (error) {
         console.error("Error al eliminar variante:", error);
         throw new Error("No se pudo eliminar la variante");
+    }
+}
+
+export async function getVariantesByFamiliaAction(familiaId: number) {
+    try {
+        // Find allowed variants for this family
+        const configs = await prisma.configuracionPermitida.findMany({
+            where: {
+                familia_id: familiaId,
+                variante_id: { not: null }
+            },
+            include: { variante: true },
+            distinct: ['variante_id']
+        });
+
+        // Return flattened variants
+        return configs.map(c => c.variante).filter(v => v !== null) as Variante[];
+    } catch (error) {
+        console.error("Error fetching variants by family:", error);
+        return [];
     }
 }

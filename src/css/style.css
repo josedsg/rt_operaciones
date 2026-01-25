@@ -4,22 +4,57 @@
 
 @layer base {
   body {
-    @apply bg-gray-2 text-dark-5 dark:bg-[#020D1A] dark:text-dark-6;
+    @apply bg-gray-2 text-dark-5;
+  }
+}
+
+.dark body {
+  @apply bg-[#020D1A] text-dark-6;
+}
+
+@media print {
+  body {
+    background-color: white !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  aside,
+  header,
+  nav,
+  .no-print,
+  button,
+  .step-wizard-container,
+  .MuiBox-root,
+  .fixed,
+  footer {
+    display: none !important;
+  }
+
+  main,
+  .relative.flex.flex-1.flex-col,
+  div {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    overflow: visible !important;
   }
 }
 
 @layer utilities {
-  /* Chrome, Safari and Opera */
+
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
 
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
-   .custom-scrollbar {
+  .custom-scrollbar {
     @apply overflow-auto;
   }
 
@@ -32,35 +67,59 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply relative flex-1 rounded-full bg-neutral-200/40 dark:bg-stroke-dark;
+    @apply relative flex-1 rounded-full bg-neutral-200/40;
   }
 
-  
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-stroke-dark;
+  }
+
+  /* Responsive variants extracted */
   .chat-height {
-    @apply h-[calc(100vh_-_8.125rem)] lg:h-[calc(100vh_-_5.625rem)];
+    @apply h-[calc(100vh_-_8.125rem)];
+  }
+
+  @media (min-width: 1024px) {
+    .chat-height {
+      @apply h-[calc(100vh_-_5.625rem)];
+    }
   }
 
   .inbox-height {
-    @apply h-[calc(100vh_-_8.125rem)] lg:h-[calc(100vh_-_5.625rem)];
+    @apply h-[calc(100vh_-_8.125rem)];
+  }
+
+  @media (min-width: 1024px) {
+    .inbox-height {
+      @apply h-[calc(100vh_-_5.625rem)];
+    }
   }
 }
 
 /* third-party libraries CSS */
 
-.tableCheckbox:checked ~ div span {
+.tableCheckbox:checked~div span {
   @apply opacity-100;
 }
 
-.tableCheckbox:checked ~ div {
+.tableCheckbox:checked~div {
   @apply border-primary bg-primary;
 }
 
 .apexcharts-legend-text {
-  @apply !text-dark-5 dark:!text-dark-6;
+  @apply !text-dark-5;
+}
+
+.dark .apexcharts-legend-text {
+  @apply !text-dark-6;
 }
 
 .apexcharts-text {
-  @apply !fill-dark-5 dark:!fill-dark-6;
+  @apply !fill-dark-5;
+}
+
+.dark .apexcharts-text {
+  @apply !fill-dark-6;
 }
 
 .apexcharts-yaxis-label {
@@ -72,15 +131,23 @@
 }
 
 .apexcharts-xcrosshairs {
-  @apply !fill-stroke dark:!fill-dark-3;
+  @apply !fill-stroke;
+}
+
+.dark .apexcharts-xcrosshairs {
+  @apply !fill-dark-3;
 }
 
 .apexcharts-gridline {
-  @apply !stroke-stroke dark:!stroke-dark-3;
+  @apply !stroke-stroke;
 }
 
-.apexcharts-series.apexcharts-pie-series path {
-  @apply dark:!stroke-transparent;
+.dark .apexcharts-gridline {
+  @apply !stroke-dark-3;
+}
+
+.dark .apexcharts-series.apexcharts-pie-series path {
+  @apply !stroke-transparent;
 }
 
 .apexcharts-legend-series {
@@ -88,28 +155,44 @@
 }
 
 .apexcharts-tooltip.apexcharts-theme-light {
-  @apply !rounded-[7px] !text-base !font-medium !text-dark !shadow-card-2 dark:!border-dark-3 dark:!bg-gray-dark dark:!text-white;
+  @apply !rounded-[7px] !text-base !font-medium !text-dark !shadow-card-2;
 }
 
-.apexcharts-tooltip.apexcharts-theme-light .apexcharts-tooltip-title {
-  @apply dark:!border-dark-3 dark:!bg-dark-2;
+.dark .apexcharts-tooltip.apexcharts-theme-light {
+  @apply !border-dark-3 !bg-gray-dark !text-white;
 }
 
-.apexcharts-xaxistooltip,
-.apexcharts-yaxistooltip {
-  @apply dark:!border-dark-2 dark:!bg-dark-2 dark:!text-dark-3;
+.dark .apexcharts-tooltip.apexcharts-theme-light .apexcharts-tooltip-title {
+  @apply !border-dark-3 !bg-dark-2;
+}
+
+.dark .apexcharts-xaxistooltip,
+.dark .apexcharts-yaxistooltip {
+  @apply !border-dark-2 !bg-dark-2 !text-dark-3;
 }
 
 .apexcharts-xaxistooltip-bottom:after {
-  @apply !border-b-gray dark:!border-b-dark;
+  @apply !border-b-gray;
+}
+
+.dark .apexcharts-xaxistooltip-bottom:after {
+  @apply !border-b-dark;
 }
 
 .apexcharts-xaxistooltip-bottom:before {
-  @apply !border-b-gray dark:!border-b-dark;
+  @apply !border-b-gray;
+}
+
+.dark .apexcharts-xaxistooltip-bottom:before {
+  @apply !border-b-dark;
 }
 
 .apexcharts-xaxistooltip-bottom {
-  @apply !rounded !border-none !bg-gray !text-sm !font-medium !text-dark dark:!bg-dark dark:!text-white;
+  @apply !rounded !border-none !bg-gray !text-sm !font-medium !text-dark;
+}
+
+.dark .apexcharts-xaxistooltip-bottom {
+  @apply !bg-dark !text-white;
 }
 
 .apexcharts-tooltip-series-group {
@@ -121,11 +204,19 @@
 }
 
 .apexcharts-datalabels-group .apexcharts-datalabel-label {
-  @apply !fill-dark-5 dark:!fill-dark-6;
+  @apply !fill-dark-5;
+}
+
+.dark .apexcharts-datalabels-group .apexcharts-datalabel-label {
+  @apply !fill-dark-6;
 }
 
 .apexcharts-datalabels-group .apexcharts-datalabel-value {
-  @apply !fill-dark dark:!fill-white;
+  @apply !fill-dark;
+}
+
+.dark .apexcharts-datalabels-group .apexcharts-datalabel-value {
+  @apply !fill-white;
 }
 
 .flatpickr-wrapper {
@@ -137,25 +228,44 @@
   @apply !fill-primary;
 }
 
-.flatpickr-calendar.arrowTop:before {
-  @apply dark:!border-b-gray-dark;
+.dark .flatpickr-calendar.arrowTop:before {
+  @apply !border-b-gray-dark;
 }
 
-.flatpickr-calendar.arrowTop:after {
-  @apply dark:!border-b-gray-dark;
+.dark .flatpickr-calendar.arrowTop:after {
+  @apply !border-b-gray-dark;
 }
 
 .flatpickr-calendar {
-  @apply !p-6 !shadow-3 dark:!bg-gray-dark dark:!text-dark-6 dark:!shadow-card 2xsm:!w-auto;
+  @apply !p-6 !shadow-3;
 }
 
-.flatpickr-day {
-  @apply dark:!text-dark-6 dark:hover:!border-dark-2 dark:hover:!bg-dark-2;
+@media (min-width: 375px) {
+  .flatpickr-calendar {
+    @apply !w-auto;
+  }
+}
+
+.dark .flatpickr-calendar {
+  @apply !bg-gray-dark !text-dark-6 !shadow-card;
+}
+
+.dark .flatpickr-day {
+  @apply !text-dark-6;
+}
+
+.dark .flatpickr-day:hover {
+  @apply !border-dark-2 !bg-dark-2;
 }
 
 .flatpickr-months .flatpickr-prev-month,
 .flatpickr-months .flatpickr-next-month {
-  @apply !top-7 dark:!fill-white dark:!text-white;
+  @apply !top-7;
+}
+
+.dark .flatpickr-months .flatpickr-prev-month,
+.dark .flatpickr-months .flatpickr-next-month {
+  @apply !fill-white !text-white;
 }
 
 .flatpickr-months .flatpickr-prev-month.flatpickr-prev-month,
@@ -168,16 +278,19 @@
   @apply !right-7;
 }
 
-span.flatpickr-weekday,
-.flatpickr-months .flatpickr-month {
-  @apply dark:!fill-white dark:!text-white;
+.dark span.flatpickr-weekday,
+.dark .flatpickr-months .flatpickr-month {
+  @apply !fill-white !text-white;
 }
 
 .flatpickr-day.inRange {
   box-shadow:
     -5px 0 0 #f3f4f6,
     5px 0 0 #f3f4f6 !important;
-  @apply dark:!shadow-datepicker;
+}
+
+.dark .flatpickr-day.inRange {
+  @apply !shadow-datepicker;
 }
 
 .flatpickr-day.inRange,
@@ -192,18 +305,32 @@ span.flatpickr-weekday,
 .flatpickr-day:focus,
 .flatpickr-day.prevMonthDay:focus,
 .flatpickr-day.nextMonthDay:focus {
-  @apply !border-gray-2 !bg-gray-2 dark:!border-dark-2 dark:!bg-dark-2;
+  @apply !border-gray-2 !bg-gray-2;
 }
 
-.flatpickr-day.selected,
-.flatpickr-day.startRange,
-.flatpickr-day.selected,
-.flatpickr-day.endRange {
-  @apply dark:!text-white;
+.dark .flatpickr-day.inRange,
+.dark .flatpickr-day:hover,
+.dark .flatpickr-day:focus {
+  @apply !border-dark-2 !bg-dark-2;
+}
+
+.dark .flatpickr-day.selected,
+.dark .flatpickr-day.startRange,
+.dark .flatpickr-day.selected,
+.dark .flatpickr-day.endRange {
+  @apply !text-white;
 }
 
 .flatpickr-day.today {
-  @apply !border-none hover:!bg-gray-2 hover:!text-dark dark:hover:!bg-dark-2 dark:hover:!text-white;
+  @apply !border-none;
+}
+
+.flatpickr-day.today:hover {
+  @apply !bg-gray-2 !text-dark;
+}
+
+.dark .flatpickr-day.today:hover {
+  @apply !bg-dark-2 !text-white;
 }
 
 .flatpickr-day.selected,
@@ -225,17 +352,35 @@ span.flatpickr-weekday,
 .flatpickr-day.startRange.nextMonthDay,
 .flatpickr-day.endRange.nextMonthDay {
   background: #3c50e0;
-  @apply !border-primary !bg-primary hover:!border-primary hover:!bg-primary;
+  @apply !border-primary !bg-primary;
 }
 
-.flatpickr-day.selected.startRange + .endRange:not(:nth-child(7n + 1)),
-.flatpickr-day.startRange.startRange + .endRange:not(:nth-child(7n + 1)),
-.flatpickr-day.endRange.startRange + .endRange:not(:nth-child(7n + 1)) {
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange:hover,
+.flatpickr-day.endRange:hover {
+  @apply !border-primary !bg-primary;
+}
+
+.flatpickr-day.selected.startRange+.endRange:not(:nth-child(7n + 1)),
+.flatpickr-day.startRange.startRange+.endRange:not(:nth-child(7n + 1)),
+.flatpickr-day.endRange.startRange+.endRange:not(:nth-child(7n + 1)) {
   box-shadow: -10px 0 0 #3c50e0;
 }
 
 .map-btn .jvm-zoom-btn {
-  @apply flex h-7.5 w-7.5 items-center justify-center rounded border border-stroke bg-white px-0 pb-0.5 pt-0 text-2xl leading-none text-dark-5 hover:border-primary hover:bg-primary hover:text-white dark:border-dark-3 dark:bg-dark-2 dark:text-dark-6 dark:hover:border-primary dark:hover:bg-primary dark:hover:text-white;
+  @apply flex h-7.5 w-7.5 items-center justify-center rounded border border-stroke bg-white px-0 pb-0.5 pt-0 text-2xl leading-none text-dark-5;
+}
+
+.map-btn .jvm-zoom-btn:hover {
+  @apply border-primary bg-primary text-white;
+}
+
+.dark .map-btn .jvm-zoom-btn {
+  @apply border-dark-3 bg-dark-2 text-dark-6;
+}
+
+.dark .map-btn .jvm-zoom-btn:hover {
+  @apply border-primary bg-primary text-white;
 }
 
 .mapOne .jvm-zoom-btn {
@@ -262,16 +407,20 @@ span.flatpickr-weekday,
   @apply !left-10;
 }
 
-.taskCheckbox:checked ~ .box span {
+.taskCheckbox:checked~.box span {
   @apply opacity-100;
 }
 
-.taskCheckbox:checked ~ p {
+.taskCheckbox:checked~p {
   @apply line-through;
 }
 
-.taskCheckbox:checked ~ .box {
-  @apply border-primary bg-primary dark:border-primary;
+.taskCheckbox:checked~.box {
+  @apply border-primary bg-primary;
+}
+
+.dark .taskCheckbox:checked~.box {
+  @apply border-primary;
 }
 
 .custom-input-date::-webkit-calendar-picker-indicator {
@@ -300,17 +449,50 @@ span.flatpickr-weekday,
 .carouselOne .swiper-button-prev,
 .carouselThree .swiper-button-next,
 .carouselThree .swiper-button-prev {
-  @apply h-10 w-10 rounded-full bg-white !text-dark-5 shadow-card-2 dark:bg-dark-2 dark:!text-dark-6 sm:h-12.5 sm:w-12.5;
+  @apply h-10 w-10 rounded-full bg-white !text-dark-5 shadow-card-2;
+}
+
+@media (min-width: 640px) {
+
+  .carouselOne .swiper-button-next,
+  .carouselOne .swiper-button-prev,
+  .carouselThree .swiper-button-next,
+  .carouselThree .swiper-button-prev {
+    @apply h-12.5 w-12.5;
+  }
+}
+
+.dark .carouselOne .swiper-button-next,
+.dark .carouselOne .swiper-button-prev,
+.dark .carouselThree .swiper-button-next,
+.dark .carouselThree .swiper-button-prev {
+  @apply bg-dark-2 !text-dark-6;
 }
 
 .carouselOne .swiper-button-prev,
 .carouselThree .swiper-button-prev {
-  @apply sm:!left-10;
+  /* fallback */
+}
+
+@media (min-width: 640px) {
+
+  .carouselOne .swiper-button-prev,
+  .carouselThree .swiper-button-prev {
+    @apply !left-10;
+  }
 }
 
 .carouselOne .swiper-button-next,
 .carouselThree .swiper-button-next {
-  @apply sm:!right-10;
+  /* fallback */
+}
+
+@media (min-width: 640px) {
+
+  .carouselOne .swiper-button-next,
+  .carouselThree .swiper-button-next {
+    @apply !right-10;
+  }
 }
 
 .carouselTwo .swiper-pagination-bullet,
@@ -325,12 +507,25 @@ span.flatpickr-weekday,
 
 .carouselTwo .swiper-pagination,
 .carouselThree .swiper-pagination {
-  @apply xl:!bottom-8;
+  /* fallback */
+}
+
+@media (min-width: 1280px) {
+
+  .carouselTwo .swiper-pagination,
+  .carouselThree .swiper-pagination {
+    @apply !bottom-8;
+  }
 }
 
 .data-stats-slider-outer .swiper-button-next,
 .data-stats-slider-outer .swiper-button-prev {
-  @apply top-1/2 h-11.5 w-11.5 rounded-full border border-stroke bg-white !text-dark drop-shadow-card dark:border-dark-3 dark:bg-dark-2 dark:!text-white;
+  @apply top-1/2 h-11.5 w-11.5 rounded-full border border-stroke bg-white !text-dark drop-shadow-card;
+}
+
+.dark .data-stats-slider-outer .swiper-button-next,
+.dark .data-stats-slider-outer .swiper-button-prev {
+  @apply border-dark-3 bg-dark-2 !text-white;
 }
 
 .data-stats-slider-outer .swiper-button-next.swiper-button-disabled,
@@ -351,61 +546,105 @@ span.flatpickr-weekday,
 }
 
 .data-table-one .datatable-search input {
-  @apply h-[46px] w-full rounded border border-stroke bg-transparent px-5 outline-none focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:focus:border-primary;
+  @apply h-[46px] w-full rounded border border-stroke bg-transparent px-5 outline-none focus:border-primary;
+}
+
+.dark .data-table-one .datatable-search input {
+  @apply border-dark-3 bg-dark-2 focus:border-primary;
 }
 
 .data-table-common .datatable-selector {
-  @apply relative z-20 inline-flex bg-transparent p-0 font-medium text-dark-5 outline-none dark:text-dark-6;
+  @apply relative z-20 inline-flex bg-transparent p-0 font-medium text-dark-5 outline-none;
+}
+
+.dark .data-table-common .datatable-selector {
+  @apply text-dark-6;
 }
 
 .data-table-common .datatable-top {
-  @apply flex flex-col gap-4 border-b border-stroke px-7.5 py-4.5 after:hidden dark:border-dark-6 sm:flex-row-reverse sm:items-center sm:justify-between sm:gap-x-4 sm:gap-y-0;
+  @apply flex flex-col gap-4 border-b border-stroke px-7.5 py-4.5 after:hidden;
+}
+
+.dark .data-table-common .datatable-top {
+  @apply border-dark-6;
+}
+
+@media (min-width: 640px) {
+  .data-table-common .datatable-top {
+    @apply flex-row-reverse items-center justify-between gap-x-4 gap-y-0;
+  }
 }
 
 .data-table-common .datatable-dropdown label {
-  @apply inline-flex items-center gap-2.5 font-medium capitalize text-dark dark:text-white;
+  @apply inline-flex items-center gap-2.5 font-medium capitalize text-dark;
+}
+
+.dark .data-table-common .datatable-dropdown label {
+  @apply text-white;
 }
 
 .datatable-table .datatable-sorter {
   @apply before:hidden after:hidden;
 }
 
-.datatable-table > thead > tr:first-child > th {
+.datatable-table>thead>tr:first-child>th {
   @apply border-transparent px-2.5 pb-2.5 pt-9 font-medium;
 }
 
-.data-table-common .datatable-table > tbody > tr > td:first-child,
-.data-table-common .datatable-table > thead > tr > th:first-child {
+.data-table-common .datatable-table>tbody>tr>td:first-child,
+.data-table-common .datatable-table>thead>tr>th:first-child {
   @apply pl-8;
 }
 
-.data-table-common .datatable-table > tbody > tr > td:last-child,
-.data-table-common .datatable-table > thead > tr > th:last-child {
+.data-table-common .datatable-table>tbody>tr>td:last-child,
+.data-table-common .datatable-table>thead>tr>th:last-child {
   @apply pr-8;
 }
 
-.data-table-common .datatable-table > thead > tr:last-child > th {
-  @apply !border-b border-stroke pb-6 dark:border-dark-3;
+.data-table-common .datatable-table>thead>tr:last-child>th {
+  @apply !border-b border-stroke pb-6;
 }
 
-.data-table-common .datatable-table > thead > tr:last-child > th input {
-  @apply h-[34px] w-full rounded border border-stroke bg-transparent px-3 text-sm outline-none focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:focus:border-primary;
+.dark .data-table-common .datatable-table>thead>tr:last-child>th {
+  @apply border-dark-3;
 }
 
-.data-table-common .datatable-table > tbody > tr {
-  @apply hover:bg-primary hover:bg-opacity-5;
+.data-table-common .datatable-table>thead>tr:last-child>th input {
+  @apply h-[34px] w-full rounded border border-stroke bg-transparent px-3 text-sm outline-none focus:border-primary;
 }
 
-.data-table-one .datatable-table > tbody > tr > td:first-child {
-  @apply text-primary dark:text-white;
+.dark .data-table-common .datatable-table>thead>tr:last-child>th input {
+  @apply border-dark-3 bg-dark-2 focus:border-primary;
 }
 
-.data-table-common .datatable-table > tbody > tr > td {
-  @apply border-b border-stroke py-5 font-medium dark:border-dark-3;
+.data-table-common .datatable-table>tbody>tr:hover {
+  @apply bg-primary bg-opacity-5;
+}
+
+.data-table-one .datatable-table>tbody>tr>td:first-child {
+  @apply text-primary;
+}
+
+.dark .data-table-one .datatable-table>tbody>tr>td:first-child {
+  @apply text-white;
+}
+
+.data-table-common .datatable-table>tbody>tr>td {
+  @apply border-b border-stroke py-5 font-medium;
+}
+
+.dark .data-table-common .datatable-table>tbody>tr>td {
+  @apply border-dark-3;
 }
 
 .data-table-one .datatable-bottom {
-  @apply flex flex-col gap-4 px-8 py-7 after:hidden sm:flex-row-reverse sm:items-center sm:justify-between sm:gap-0 sm:space-x-4;
+  @apply flex flex-col gap-4 px-8 py-7 after:hidden;
+}
+
+@media (min-width: 640px) {
+  .data-table-one .datatable-bottom {
+    @apply flex-row-reverse items-center justify-between gap-0 space-x-4;
+  }
 }
 
 .data-table-common .datatable-wrapper.no-footer .datatable-container {
@@ -421,7 +660,15 @@ span.flatpickr-weekday,
 }
 
 .data-table-common .datatable-pagination a {
-  @apply flex h-8 w-8 cursor-pointer items-center justify-center rounded p-0 font-medium text-dark-5 hover:bg-primary hover:text-white dark:text-dark-6;
+  @apply flex h-8 w-8 cursor-pointer items-center justify-center rounded p-0 font-medium text-dark-5;
+}
+
+.data-table-common .datatable-pagination a:hover {
+  @apply bg-primary text-white;
+}
+
+.dark .data-table-common .datatable-pagination a {
+  @apply text-dark-6;
 }
 
 .data-table-common .datatable-pagination .datatable-active a {
@@ -433,11 +680,21 @@ span.flatpickr-weekday,
 }
 
 .data-table-two .datatable-bottom {
-  @apply flex flex-col gap-4 px-8 py-7 after:hidden sm:flex-row sm:items-center sm:justify-between sm:gap-0 sm:space-x-4;
+  @apply flex flex-col gap-4 px-8 py-7 after:hidden;
+}
+
+@media (min-width: 640px) {
+  .data-table-two .datatable-bottom {
+    @apply flex-row items-center justify-between gap-0 space-x-4;
+  }
 }
 
 .data-table-two .datatable-search input {
-  @apply h-11.5 w-full rounded border border-stroke bg-gray-2 px-5 outline-none focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:focus:border-primary;
+  @apply h-11.5 w-full rounded border border-stroke bg-gray-2 px-5 outline-none focus:border-primary;
+}
+
+.dark .data-table-two .datatable-search input {
+  @apply border-dark-3 bg-dark-2 focus:border-primary;
 }
 
 .rangeSliderCommon .noUi-target {
@@ -445,7 +702,11 @@ span.flatpickr-weekday,
 }
 
 .rangeSliderCommon .noUi-connects {
-  @apply h-1.5 rounded-full bg-stroke dark:bg-dark-3;
+  @apply h-1.5 rounded-full bg-stroke;
+}
+
+.dark .rangeSliderCommon .noUi-connects {
+  @apply bg-dark-3;
 }
 
 .rangeSliderCommon .noUi-connect {
@@ -457,7 +718,11 @@ span.flatpickr-weekday,
 }
 
 .rangeSliderTwo .noUi-horizontal .noUi-handle {
-  @apply -top-2 h-6 w-6 rounded-full border-[6px] border-primary bg-white shadow-none dark:bg-dark;
+  @apply -top-2 h-6 w-6 rounded-full border-[6px] border-primary bg-white shadow-none;
+}
+
+.dark .rangeSliderTwo .noUi-horizontal .noUi-handle {
+  @apply bg-dark;
 }
 
 .noUi-horizontal .noUi-handle:after,

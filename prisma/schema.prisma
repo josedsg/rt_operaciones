@@ -115,6 +115,11 @@ model Cliente {
   nombre             String
   nombre_comercial   String?
   email_notificacion String?
+  
+  // Shipping Defaults
+  agencia            String?
+  terminal           String?
+
   telefono           String?
   sitio_web          String?
   
@@ -146,6 +151,9 @@ model Cliente {
   fecha_creacion     DateTime? @default(now())
   fecha_modificacion DateTime? @updatedAt
   pedidos            PedidoVenta[]
+  
+  // Relations
+  allowed_empaques   ClienteEmpaque[]
 
   @@map("clientes")
 }
@@ -233,6 +241,9 @@ model ProductoMaestro {
   fecha_modificacion DateTime? @updatedAt
   lineas_venta       LineaPedidoVenta[]
   productos_proveedores ProductoProveedor[]
+  
+  // Relations
+  allowed_empaques   ProductoEmpaque[]
 
   @@map("productos_maestros")
 }
@@ -276,6 +287,18 @@ model PedidoVenta {
   xml_envio          String?
   xml_respuesta      String?
   estado_factura     String?   @default("PENDIENTE") // PENDIENTE, ENVIADO, ACEPTADO, RECHAZADO
+
+  // Shipping Data
+  agencia            String?
+  terminal           String?
+  
+  // User Relation
+  usuario_id         Int?
+  usuario            Usuario?  @relation(fields: [usuario_id], references: [id])
+
+  // Export Relation
+  exportacion_id     Int?
+  exportacion        Exportacion? @relation(fields: [exportacion_id], references: [id])
   
   lineas             LineaPedidoVenta[]
   
@@ -389,6 +412,84 @@ model Empaque {
   fecha_creacion     DateTime? @default(now())
   fecha_modificacion DateTime? @updatedAt
   lineas_venta       LineaPedidoVenta[]
+  
+
+  // Relations
+  allowed_products   ProductoEmpaque[]
+  allowed_clientes   ClienteEmpaque[]
 
   @@map("empaques")
+}
+
+model ProductoEmpaque {
+  id                 Int             @id @default(autoincrement())
+  producto_id        Int
+  producto           ProductoMaestro @relation(fields: [producto_id], references: [id], onDelete: Cascade)
+  empaque_id         Int
+  empaque            Empaque         @relation(fields: [empaque_id], references: [id], onDelete: Cascade)
+  
+  fecha_creacion     DateTime?       @default(now())
+
+  @@unique([producto_id, empaque_id])
+  @@map("productos_empaques")
+}
+
+model ClienteEmpaque {
+  id                 Int             @id @default(autoincrement())
+  cliente_id         Int
+  cliente            Cliente         @relation(fields: [cliente_id], references: [id], onDelete: Cascade)
+  empaque_id         Int
+  empaque            Empaque         @relation(fields: [empaque_id], references: [id], onDelete: Cascade)
+  
+  fecha_creacion     DateTime?       @default(now())
+
+  @@unique([cliente_id, empaque_id])
+  @@map("clientes_empaques")
+}
+
+model CompanyConfig {
+  id          Int      @id @default(autoincrement())
+  nombre      String
+  direccion   String   @db.Text
+  telefono    String?
+  email       String?
+  logo_url    String?
+  website     String?
+  ein_number  String?  // For "EIN 33-Miami"
+  
+  fecha_creacion DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+
+  @@map("company_config")
+}
+
+model Usuario {
+  id          Int      @id @default(autoincrement())
+  nombre      String
+  email       String   @unique
+  password    String   // Hashed password
+  rol         String?  @default("USER") // ADMIN, USER, VENDEDOR
+
+  pedidos     PedidoVenta[]
+  exportaciones Exportacion[]
+  
+  fecha_creacion DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+
+  @@map("usuarios")
+}
+
+model Exportacion {
+  id              Int       @id @default(autoincrement())
+  fecha           DateTime  @db.Date
+  usuario_id      Int
+  usuario         Usuario   @relation(fields: [usuario_id], references: [id])
+  estado          String    @default("BORRADOR") // BORRADOR, PROCESADA, CERRADA
+  
+  pedidos         PedidoVenta[]
+  
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+
+  @@map("exportaciones")
 }

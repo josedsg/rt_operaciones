@@ -57,6 +57,11 @@ export type PedidoVentaInput = {
     xml_envio?: string;
     xml_respuesta?: string;
     estado_factura?: string;
+
+    // Shipping & User
+    agencia?: string;
+    terminal?: string;
+    usuario_id?: number;
 };
 
 export type PedidoVentaWithLineas = PedidoVenta & {
@@ -163,6 +168,9 @@ export async function createPedidoAction(dataRaw: PedidoVentaInput) {
             xml_envio: data.xml_envio,
             xml_respuesta: data.xml_respuesta,
             estado_factura: data.estado_factura,
+            agencia: data.agencia,
+            terminal: data.terminal,
+            usuario_id: data.usuario_id,
         };
 
         let pedido;
@@ -446,5 +454,67 @@ export async function getVentasStatsAction() {
     } catch (error) {
         console.error("Error fetching ventas stats:", error);
         return [];
+    }
+}
+
+export async function getCompanyConfigAction() {
+    try {
+        return await prisma.companyConfig.findFirst();
+    } catch (error) {
+        console.error("Error fetching company config:", error);
+        return null;
+    }
+}
+
+export async function getUsuariosAction() {
+    try {
+        return await prisma.usuario.findMany({
+            orderBy: { nombre: "asc" }
+        });
+    } catch (error) {
+        console.error("Error fetching usuarios:", error);
+        return [];
+    }
+}
+// Assorted Config Persistence
+export async function saveAssortedConfigAction(lineaPedidoId: number, config: ConfiguracionAssortedInput[]) {
+    try {
+        await prisma.$transaction(async (tx) => {
+            // 1. Delete existing config for this line
+            await tx.configuracionAssorted.deleteMany({
+                where: { linea_pedido_id: lineaPedidoId }
+            });
+
+            // 2. Insert new config
+            if (config.length > 0) {
+                await tx.configuracionAssorted.createMany({
+                    data: config.map(c => ({
+                        linea_pedido_id: lineaPedidoId,
+                        variante_id: c.variante_id,
+                        cantidad: c.cantidad
+                    }))
+                });
+            }
+        });
+
+        revalidatePath("/exportaciones/nuevo"); // Revalidate wizard context if possible, though mostly client state
+        return { success: true };
+    } catch (error) {
+        console.error("Error saving assorted config:", error);
+        throw new Error("Error al guardar configuración de surtido");
+    }
+}
+
+export async function confirmPedidoAction(id: number) {
+    try {
+        await prisma.pedidoVenta.update({
+            where: { id },
+            data: { estado: "CONFIRMADO" }
+        });
+        revalidatePath("/ventas");
+        return { success: true };
+    } catch (error) {
+        console.error("Error confirming pedido:", error);
+        throw new Error("Error al confirmar pedido");
     }
 }

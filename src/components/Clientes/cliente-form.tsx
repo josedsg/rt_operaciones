@@ -5,15 +5,17 @@ import { useRouter } from "next/navigation";
 import {
     createClienteAction,
     updateClienteAction,
+    getDistritosAction,
     getClienteByIdAction,
     getTiposIdentificacionAction,
     getTiposClienteAction,
     getTerminosPagoAction,
     getPaisesAction,
     getProvinciasAction,
-    getCantonesAction,
-    getDistritosAction
+    getCantonesAction
 } from "@/actions/clientes";
+import { getEmpaquesAction } from "@/actions/empaques";
+import { Empaque } from "@prisma/client";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
@@ -35,6 +37,9 @@ export default function ClienteForm({ clienteId }: ClienteFormProps) {
     const [cantones, setCantones] = useState<any[]>([]);
     const [distritos, setDistritos] = useState<any[]>([]);
 
+    const [empaques, setEmpaques] = useState<Empaque[]>([]);
+    const [selectedEmpaques, setSelectedEmpaques] = useState<number[]>([]);
+
     const [formData, setFormData] = useState({
         tipo_identificacion_id: 0,
         identificacion: "",
@@ -55,6 +60,8 @@ export default function ClienteForm({ clienteId }: ClienteFormProps) {
         tipo_facturacion: "GRAVADO",
         num_documento_exoneracion: "",
         fecha_vencimiento_exoneracion: "",
+        agencia: "",
+        terminal: ""
     });
 
     // Load initial catalogs
@@ -72,6 +79,10 @@ export default function ClienteForm({ clienteId }: ClienteFormProps) {
             setTerminosPago(tp);
             setPaises(pa);
             setProvincias(pr);
+
+            const allEmpaques = await getEmpaquesAction();
+            setEmpaques(allEmpaques);
+
 
             // Set defaults if creating new
             if (!clienteId) {
@@ -123,7 +134,13 @@ export default function ClienteForm({ clienteId }: ClienteFormProps) {
                         tipo_facturacion: cliente.tipo_facturacion || "GRAVADO",
                         num_documento_exoneracion: cliente.num_documento_exoneracion || "",
                         fecha_vencimiento_exoneracion: cliente.fecha_vencimiento_exoneracion ? cliente.fecha_vencimiento_exoneracion.toString().split('T')[0] : "",
+                        agencia: (cliente as any).agencia || "",
+                        terminal: (cliente as any).terminal || ""
                     });
+                    const clientWithRelations = cliente as any;
+                    if (clientWithRelations.allowed_empaques) {
+                        setSelectedEmpaques(clientWithRelations.allowed_empaques.map((ae: any) => ae.empaque_id));
+                    }
                 }
                 setFetching(false);
             });
@@ -148,16 +165,23 @@ export default function ClienteForm({ clienteId }: ClienteFormProps) {
         }
     }, [formData.canton_id]);
 
+    const toggleEmpaque = (id: number) => {
+        setSelectedEmpaques(prev =>
+            prev.includes(id) ? prev.filter(e => e !== id) : [...prev, id]
+        );
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
         try {
+            const payload = { ...formData, empaques: selectedEmpaques };
             if (clienteId) {
-                await updateClienteAction(clienteId, formData);
+                await updateClienteAction(clienteId, payload);
                 toast.success("Cliente actualizado con éxito");
             } else {
-                await createClienteAction(formData);
+                await createClienteAction(payload);
                 toast.success("Cliente creado con éxito");
             }
             router.push("/clientes");
@@ -424,6 +448,55 @@ export default function ClienteForm({ clienteId }: ClienteFormProps) {
                             onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
                             className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                         ></textarea>
+                    </div>
+
+                    <div className="md:col-span-2 border-b border-stroke pb-2 mb-2 mt-4 dark:border-strokedark">
+                        <h4 className="font-semibold text-primary">Logística (Predeterminados)</h4>
+                    </div>
+
+                    <div>
+                        <label className="mb-2.5 block text-black dark:text-white">Agencia</label>
+                        <input
+                            type="text"
+                            value={formData.agencia}
+                            onChange={(e) => setFormData({ ...formData, agencia: e.target.value })}
+                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                            placeholder="Ej. Tikal"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="mb-2.5 block text-black dark:text-white">Terminal</label>
+                        <input
+                            type="text"
+                            value={formData.terminal}
+                            onChange={(e) => setFormData({ ...formData, terminal: e.target.value })}
+                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                            placeholder="Ej. 12345"
+                        />
+                    </div>
+                </div>
+
+                <div className="flex justify-end gap-4.5">
+                    <div className="w-full mb-6 mt-4 border-t border-stroke pt-4 dark:border-strokedark">
+                        <label className="mb-2.5 block font-medium text-black dark:text-white">
+                            Empaques Permitidos <span className="text-xs font-normal text-gray-500">(Dejar vacío para permitir todos)</span>
+                        </label>
+                        <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto border border-stroke rounded p-2 dark:border-strokedark bg-gray-50 dark:bg-meta-4">
+                            {empaques.map(e => (
+                                <button
+                                    key={e.id}
+                                    type="button"
+                                    onClick={() => toggleEmpaque(e.id)}
+                                    className={`px-3 py-1 text-xs rounded-full border transition-all ${selectedEmpaques.includes(e.id)
+                                        ? 'bg-primary text-white border-primary'
+                                        : 'bg-white text-black border-stroke hover:border-primary dark:bg-boxdark dark:text-white dark:border-strokedark'
+                                        }`}
+                                >
+                                    {e.nombre}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
 

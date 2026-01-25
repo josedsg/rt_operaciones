@@ -64,11 +64,11 @@ export function AssortedModal({ isOpen, onClose, onSave, variantesDisponibles, i
             return;
         }
 
-        // Optional: Validate total against target
-        // if (totalConfigured !== totalTarget) {
-        //     toast.error(`La suma debe ser igual a ${totalTarget}`);
-        //     return;
-        // }
+        // Validate total against target
+        if (totalConfigured > totalTarget) {
+            toast.error(`La suma no puede ser mayor a ${totalTarget}`);
+            return;
+        }
 
         onSave(config);
         onClose();
@@ -128,7 +128,7 @@ export function AssortedModal({ isOpen, onClose, onSave, variantesDisponibles, i
                     </button>
 
                     <div className="flex justify-between items-center pt-4 border-t mt-4">
-                        <span className="font-bold">Total Configurado:</span>
+                        <span className="font-bold">Total por Caja:</span>
                         <span className={`font-bold ${totalConfigured === totalTarget ? 'text-success' : 'text-warning'}`}>
                             {totalConfigured} / {totalTarget}
                         </span>

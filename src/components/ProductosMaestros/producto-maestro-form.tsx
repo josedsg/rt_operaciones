@@ -1,16 +1,17 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { ProductoMaestro, Familia, Variante, Tamano, ConfiguracionPermitida } from "@prisma/client";
-import { createProductoMaestroAction, updateProductoMaestroAction } from "@/actions/productos-maestros";
+import { ProductoMaestro, Familia, Variante, Tamano, ConfiguracionPermitida, Empaque } from "@prisma/client";
+import { createProductoMaestroAction, updateProductoMaestroAction, ProductoMaestroWithRelations } from "@/actions/productos-maestros";
 import { getFamiliasAction } from "@/actions/familias";
+import { getEmpaquesAction } from "@/actions/empaques";
 import { getConfiguracionesAction, getAllVariantes, getAllTamanos } from "@/actions/configuraciones";
 import toast from "react-hot-toast";
 
 interface ProductoMaestroFormProps {
     onClose: () => void;
     onSuccess: () => void;
-    initialData?: ProductoMaestro | null;
+    initialData?: ProductoMaestroWithRelations | null; // Updated type
 }
 
 type ConfigWithRelations = ConfiguracionPermitida & { variante: Variante | null, tamano: Tamano | null };
@@ -27,6 +28,10 @@ export function ProductoMaestroForm({ onClose, onSuccess, initialData }: Product
     const [familias, setFamilias] = useState<Familia[]>([]);
     const [allVariantes, setAllVariantes] = useState<Variante[]>([]);
     const [allTamanos, setAllTamanos] = useState<Tamano[]>([]);
+    const [empaques, setEmpaques] = useState<Empaque[]>([]);
+
+    // Selection
+    const [selectedEmpaques, setSelectedEmpaques] = useState<number[]>([]);
 
     // Loaded Configs for current family
     const [configuraciones, setConfiguraciones] = useState<ConfigWithRelations[]>([]);
@@ -34,18 +39,24 @@ export function ProductoMaestroForm({ onClose, onSuccess, initialData }: Product
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
 
-    // 1. Initial Load (Familias + All Variantes/Tamanos for wildcards)
+    // 1. Initial Load (Familias + All Variantes/Tamanos + Empaques)
     useEffect(() => {
         Promise.all([
             getFamiliasAction(),
             getAllVariantes(),
-            getAllTamanos()
-        ]).then(([f, v, t]) => {
+            getAllTamanos(),
+            getEmpaquesAction()
+        ]).then(([f, v, t, e]) => {
             setFamilias(f);
             setAllVariantes(v);
             setAllTamanos(t);
+            setEmpaques(e);
         });
-    }, []);
+
+        if (initialData?.allowed_empaques) {
+            setSelectedEmpaques(initialData.allowed_empaques.map(ae => ae.empaque_id));
+        }
+    }, [initialData]);
 
     // 2. When Familia changes, load configurations
     useEffect(() => {
@@ -95,8 +106,16 @@ export function ProductoMaestroForm({ onClose, onSuccess, initialData }: Product
         const allowedIds = new Set(relevantConfigs.map(c => c.tamano_id).filter(Boolean));
         return allTamanos.filter(t => allowedIds.has(t.id));
 
+
+
+
     }, [familiaId, varianteId, configuraciones, allTamanos]);
 
+    const toggleEmpaque = (id: number) => {
+        setSelectedEmpaques(prev =>
+            prev.includes(id) ? prev.filter(e => e !== id) : [...prev, id]
+        );
+    };
 
     // Handle Submit
     const handleSubmit = async (e: React.FormEvent) => {
@@ -112,7 +131,9 @@ export function ProductoMaestroForm({ onClose, onSuccess, initialData }: Product
             formData.append("descripcion", descripcion);
             formData.append("familia_id", familiaId);
             formData.append("variante_id", varianteId);
+            formData.append("variante_id", varianteId);
             formData.append("tamano_id", tamanoId);
+            formData.append("empaques", selectedEmpaques.join(","));
 
             if (initialData) {
                 await updateProductoMaestroAction(formData);
@@ -230,6 +251,27 @@ export function ProductoMaestroForm({ onClose, onSuccess, initialData }: Product
                             onChange={(e) => setDescripcion(e.target.value)}
                             className="w-full rounded border border-stroke bg-white py-3 px-5 outline-none focus:border-primary dark:border-strokedark dark:bg-boxdark"
                         ></textarea>
+                    </div>
+
+                    <div className="mb-6">
+                        <label className="mb-2.5 block font-medium text-black dark:text-white">
+                            Empaques Permitidos <span className="text-xs font-normal text-gray-500">(Dejar vacío para permitir todos)</span>
+                        </label>
+                        <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto border border-stroke rounded p-2 dark:border-strokedark bg-gray-50 dark:bg-meta-4">
+                            {empaques.map(e => (
+                                <button
+                                    key={e.id}
+                                    type="button"
+                                    onClick={() => toggleEmpaque(e.id)}
+                                    className={`px-3 py-1 text-xs rounded-full border transition-all ${selectedEmpaques.includes(e.id)
+                                        ? 'bg-primary text-white border-primary'
+                                        : 'bg-white text-black border-stroke hover:border-primary dark:bg-boxdark dark:text-white dark:border-strokedark'
+                                        }`}
+                                >
+                                    {e.nombre}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     {error && <p className="mb-4 text-sm text-red-500">{error}</p>}

@@ -12,7 +12,7 @@ export function StepWizard({ currentStep, onStepClick }: { currentStep: number; 
     ];
 
     return (
-        <div className="relative flex justify-between">
+        <div className="relative flex justify-between print:hidden">
             {/* Connecting Line */}
             <div className="absolute left-0 top-1/2 -z-1 h-1 w-full -translate-y-1/2 bg-gray-200 dark:bg-meta-4"></div>
             <div

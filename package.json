@@ -10,13 +10,18 @@
   },
   "dependencies": {
     "@prisma/client": "^6.19.1",
+    "@types/bcryptjs": "^2.4.6",
     "apexcharts": "^4.5.0",
+    "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
     "flatpickr": "^4.6.13",
+    "jspdf": "^4.0.0",
+    "jspdf-autotable": "^5.0.7",
     "jsvectormap": "^1.6.0",
     "next": "16.0.10",
+    "next-auth": "^5.0.0-beta.30",
     "next-themes": "^0.4.4",
     "nextjs-toploader": "^3.7.15",
     "react": "^19.2.0",
@@ -24,7 +29,8 @@
     "react-dom": "^19.2.0",
     "react-hot-toast": "^2.6.0",
     "tailwind-merge": "^2.6.0",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^22",

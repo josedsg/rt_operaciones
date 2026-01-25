@@ -1,7 +1,8 @@
 "use server";
+// Force reload
 
 import { prisma } from "@/lib/prisma";
-import { ProductoMaestro, Familia, Variante, Tamano } from "@prisma/client";
+import { ProductoMaestro, Familia, Variante, Tamano, ProductoEmpaque, Empaque } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { toUpperCaseFields } from "@/lib/utils";
 
@@ -79,6 +80,7 @@ export type ProductoMaestroWithRelations = ProductoMaestro & {
     familia: Familia;
     variante: Variante;
     tamano: Tamano;
+    allowed_empaques: (ProductoEmpaque & { empaque: Empaque })[];
 };
 
 export type GetProductosMaestrosParams = {
@@ -132,6 +134,9 @@ export async function getProductosMaestrosAction({
                     familia: true,
                     variante: true,
                     tamano: true,
+                    allowed_empaques: {
+                        include: { empaque: true }
+                    }
                 },
                 skip,
                 take: limit,
@@ -162,6 +167,8 @@ export async function createProductoMaestroAction(formData: FormData) {
         const variante_id = parseInt(formData.get("variante_id") as string);
         const tamano_id = parseInt(formData.get("tamano_id") as string);
 
+        const empaques_ids = formData.get("empaques") ? (formData.get("empaques") as string).split(",").map(Number) : [];
+
         const rawData = {
             nombre,
             descripcion,
@@ -172,8 +179,19 @@ export async function createProductoMaestroAction(formData: FormData) {
 
         const productData = toUpperCaseFields(rawData);
 
-        await prisma.productoMaestro.create({
-            data: productData,
+        await prisma.$transaction(async (tx) => {
+            const product = await tx.productoMaestro.create({
+                data: productData,
+            });
+
+            if (empaques_ids.length > 0) {
+                await tx.productoEmpaque.createMany({
+                    data: empaques_ids.map(eid => ({
+                        producto_id: product.id,
+                        empaque_id: eid
+                    }))
+                });
+            }
         });
 
         revalidatePath("/productos/maestros");
@@ -192,6 +210,8 @@ export async function updateProductoMaestroAction(formData: FormData) {
         const variante_id = parseInt(formData.get("variante_id") as string);
         const tamano_id = parseInt(formData.get("tamano_id") as string);
 
+        const empaques_ids = formData.get("empaques") ? (formData.get("empaques") as string).split(",").map(Number) : [];
+
         const rawData = {
             nombre,
             descripcion,
@@ -202,9 +222,26 @@ export async function updateProductoMaestroAction(formData: FormData) {
 
         const productData = toUpperCaseFields(rawData);
 
-        await prisma.productoMaestro.update({
-            where: { id },
-            data: productData,
+        // Transaction to update product and manage relations
+        await prisma.$transaction(async (tx) => {
+            await tx.productoMaestro.update({
+                where: { id },
+                data: productData,
+            });
+
+            // Sync Allowed Empaques
+            await tx.productoEmpaque.deleteMany({
+                where: { producto_id: id }
+            });
+
+            if (empaques_ids.length > 0) {
+                await tx.productoEmpaque.createMany({
+                    data: empaques_ids.map(eid => ({
+                        producto_id: id,
+                        empaque_id: eid
+                    }))
+                });
+            }
         });
 
         revalidatePath("/productos/maestros");
