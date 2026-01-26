@@ -62,6 +62,8 @@ export type PedidoVentaInput = {
     agencia?: string;
     terminal?: string;
     usuario_id?: number;
+    exportacion_id?: number;
+    cliente_tipo_facturacion?: string;
 };
 
 export type PedidoVentaWithLineas = PedidoVenta & {
@@ -292,7 +294,7 @@ export async function getPedidoByIdAction(id: number) {
         const pedido = await prisma.pedidoVenta.findUnique({
             where: { id },
             include: {
-                cliente: { select: { nombre: true, nombre_comercial: true } },
+                cliente: { select: { nombre: true, nombre_comercial: true, tipo_facturacion: true } },
                 lineas: {
                     include: {
                         producto: { select: { nombre: true } },

@@ -80,33 +80,119 @@ export default function ProveedorProductos({ proveedorId }: ProveedorProductosPr
                 />
             </div>
 
-            <div className="max-h-60 overflow-y-auto border border-stroke dark:border-strokedark rounded-md mb-4">
+            <div className="flex justify-between items-center mb-4">
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => {
+                            const allIds = filteredProducts.map(p => p.id);
+                            const allSelected = allIds.every(id => selectedProductIds.includes(id));
+                            if (allSelected) {
+                                setSelectedProductIds(prev => prev.filter(id => !allIds.includes(id)));
+                            } else {
+                                const newIds = allIds.filter(id => !selectedProductIds.includes(id));
+                                setSelectedProductIds(prev => [...prev, ...newIds]);
+                            }
+                        }}
+                        className="text-sm text-primary font-medium hover:underline"
+                    >
+                        {filteredProducts.length > 0 && filteredProducts.every(p => selectedProductIds.includes(p.id))
+                            ? "Deseleccionar Todos"
+                            : "Seleccionar Todos"}
+                    </button>
+                    <span className="text-gray-400">|</span>
+                    <span className="text-sm text-gray-500">{filteredProducts.length} filtrados</span>
+                </div>
+            </div>
+
+            <div className="max-h-96 overflow-y-auto border border-stroke dark:border-strokedark rounded-md mb-4">
                 <table className="w-full table-auto">
-                    <thead className="sticky top-0 bg-gray-2 dark:bg-meta-4">
+                    <thead className="sticky top-0 bg-gray-2 dark:bg-meta-4 z-10">
                         <tr>
-                            <th className="py-2 px-4 text-left font-medium">Asociar</th>
-                            <th className="py-2 px-4 text-left font-medium">Familia</th>
-                            <th className="py-2 px-4 text-left font-medium">Producto / Descripción</th>
+                            <th className="py-2 px-4 text-left font-medium w-16">
+                                <input
+                                    type="checkbox"
+                                    checked={filteredProducts.length > 0 && filteredProducts.every(p => selectedProductIds.includes(p.id))}
+                                    onChange={() => {
+                                        const allIds = filteredProducts.map(p => p.id);
+                                        const allSelected = allIds.every(id => selectedProductIds.includes(id));
+                                        if (allSelected) {
+                                            setSelectedProductIds(prev => prev.filter(id => !allIds.includes(id)));
+                                        } else {
+                                            const newIds = allIds.filter(id => !selectedProductIds.includes(id));
+                                            setSelectedProductIds(prev => [...prev, ...newIds]);
+                                        }
+                                    }}
+                                    className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
+                                />
+                            </th>
+                            <th className="py-2 px-4 text-left font-medium">Familia / Producto</th>
+                            <th className="py-2 px-4 text-left font-medium">Descripción</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredProducts.map((p) => (
-                            <tr key={p.id} className="border-b border-stroke dark:border-strokedark hover:bg-gray-1 dark:hover:bg-meta-4">
-                                <td className="py-2 px-4">
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedProductIds.includes(p.id)}
-                                        onChange={() => handleToggleProduct(p.id)}
-                                        className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
-                                    />
-                                </td>
-                                <td className="py-2 px-4 text-sm">{p.familia.nombre_cientifico}</td>
-                                <td className="py-2 px-4">
-                                    <div className="text-sm font-medium">{p.nombre}</div>
-                                    <div className="text-xs text-gray-500">{p.descripcion}</div>
-                                </td>
-                            </tr>
-                        ))}
+                        {Object.entries(
+                            filteredProducts.reduce((acc, curr) => {
+                                const fam = curr.familia.nombre_cientifico;
+                                if (!acc[fam]) acc[fam] = [];
+                                acc[fam].push(curr);
+                                return acc;
+                            }, {} as Record<string, typeof filteredProducts>)
+                        ).sort((a, b) => a[0].localeCompare(b[0])).map(([familiaName, products]) => {
+                            const allFamilySelected = products.every(p => selectedProductIds.includes(p.id));
+                            const someFamilySelected = products.some(p => selectedProductIds.includes(p.id));
+
+                            return (
+                                <>
+                                    {/* Header de Familia */}
+                                    <tr key={`fam-${familiaName}`} className="bg-gray-100 dark:bg-meta-4 font-bold">
+                                        <td className="py-2 px-4">
+                                            <input
+                                                type="checkbox"
+                                                checked={allFamilySelected}
+                                                ref={input => {
+                                                    if (input) {
+                                                        input.indeterminate = someFamilySelected && !allFamilySelected;
+                                                    }
+                                                }}
+                                                onChange={() => {
+                                                    const familyIds = products.map(p => p.id);
+                                                    if (allFamilySelected) {
+                                                        setSelectedProductIds(prev => prev.filter(id => !familyIds.includes(id)));
+                                                    } else {
+                                                        const newIds = familyIds.filter(id => !selectedProductIds.includes(id));
+                                                        setSelectedProductIds(prev => [...prev, ...newIds]);
+                                                    }
+                                                }}
+                                                className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
+                                            />
+                                        </td>
+                                        <td colSpan={2} className="py-2 px-4 text-primary">
+                                            {familiaName} <span className="text-xs text-gray-500 font-normal">({products.length} productos)</span>
+                                        </td>
+                                    </tr>
+                                    {/* Productos de la Familia */}
+                                    {products.map(p => (
+                                        <tr key={p.id} className="border-b border-stroke dark:border-strokedark hover:bg-gray-1 dark:hover:bg-meta-4/50">
+                                            <td className="py-2 px-4 text-center">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedProductIds.includes(p.id)}
+                                                    onChange={() => handleToggleProduct(p.id)}
+                                                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary ml-1"
+                                                />
+                                            </td>
+                                            <td className="py-2 px-4 text-sm pl-8">
+                                                {p.nombre}
+                                            </td>
+                                            <td className="py-2 px-4 text-xs text-gray-500">
+                                                {p.descripcion}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </>
+                            );
+                        })}
+
                         {filteredProducts.length === 0 && (
                             <tr>
                                 <td colSpan={3} className="py-4 text-center text-gray-500">

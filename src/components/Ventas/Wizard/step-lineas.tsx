@@ -100,6 +100,12 @@ export function StepLineas({ data, updateData, isReadOnly = false }: StepLineasP
         stems_per_box: 0
     });
 
+    // Auto-set Tax based on Client
+    useEffect(() => {
+        const defaultTax = data.cliente_tipo_facturacion === 'EXONERADO' ? 0 : 13;
+        setNewLine(prev => ({ ...prev, impuesto: defaultTax }));
+    }, [data.cliente_tipo_facturacion]);
+
     // Cargar productos permitidos por proveedor
     useEffect(() => {
         if (newLine.proveedor_id) {
@@ -346,7 +352,7 @@ export function StepLineas({ data, updateData, isReadOnly = false }: StepLineasP
             cantidad: 0,
             precio_unitario: 0,
             precio_proveedor: 0,
-            impuesto: 13,
+            impuesto: data.cliente_tipo_facturacion === 'EXONERADO' ? 0 : 13,
             especificaciones: "",
             exoneracion: 0,
             cajas: 0,
@@ -394,7 +400,7 @@ export function StepLineas({ data, updateData, isReadOnly = false }: StepLineasP
             cantidad: 0,
             precio_unitario: 0,
             precio_proveedor: 0,
-            impuesto: 13,
+            impuesto: data.cliente_tipo_facturacion === 'EXONERADO' ? 0 : 13,
             especificaciones: "",
             exoneracion: 0,
             cajas: 0,
@@ -980,8 +986,9 @@ export function StepLineas({ data, updateData, isReadOnly = false }: StepLineasP
                                                     </span>
                                                 </div>
                                                 <button
-                                                    onClick={() => editLine(idx)}
-                                                    className="opacity-0 group-hover:opacity-100 p-1 text-primary hover:bg-primary/10 rounded transition-all"
+                                                    onClick={() => !isReadOnly && editLine(idx)}
+                                                    disabled={isReadOnly}
+                                                    className={`opacity-0 group-hover:opacity-100 p-1 rounded transition-all ${isReadOnly ? 'hidden' : 'text-primary hover:bg-primary/10'}`}
                                                     title="Editar esta línea"
                                                 >
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>

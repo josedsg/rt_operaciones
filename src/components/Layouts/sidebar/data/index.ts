@@ -65,9 +65,25 @@ export const NAV_DATA: { label: string; items: MenuItem[] }[] = [
       },
       {
         title: "Exportaciones",
-        url: "/exportaciones",
+        url: "#",
         icon: Icons.Table,
-        items: [],
+        items: [
+          {
+            title: "Tablero",
+            url: "/exportaciones/dashboard",
+            items: []
+          },
+          {
+            title: "Lista de Exportaciones",
+            url: "/exportaciones",
+            items: []
+          },
+          {
+            title: "Simulador Packing List",
+            url: "/exportaciones/packing-list",
+            items: []
+          }
+        ],
       },
     ],
   },
@@ -112,6 +128,18 @@ export const NAV_DATA: { label: string; items: MenuItem[] }[] = [
         title: "Limpiar Base de Datos",
         url: "/ventas/admin/clear-db",
         icon: Icons.PieChart,
+        items: [],
+      },
+      {
+        title: "Carga Inicial Productos",
+        url: "/ventas/admin/carga-inicial",
+        icon: Icons.FourCircle,
+        items: [],
+      },
+      {
+        title: "Carga Inicial Clientes",
+        url: "/ventas/admin/carga-inicial-clientes",
+        icon: Icons.User,
         items: [],
       },
       {

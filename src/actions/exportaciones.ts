@@ -3,15 +3,26 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-export async function getOrdersForExport(date: string) {
+export async function getOrdersForExport(startDate: string, endDate: string | null = null, excludeExported: boolean = false) {
     try {
-        // Fetch orders for the specific date
-        // Ideally filter by status (e.g., != BORRADOR), but for now fetch all
+        // Build where clause based on flag
+        const whereClause: any = {
+            fecha_pedido: endDate
+                ? { gte: new Date(startDate), lte: new Date(endDate) }
+                : new Date(startDate),
+        };
+
+        if (excludeExported) {
+            // For "New Export", only show confirmed orders that are NOT yet exported
+            whereClause.estado = "CONFIRMADO";
+            whereClause.exportacion_id = null;
+        } else {
+            // For "Simulator" or general view, show both confirmed and exported
+            whereClause.estado = { in: ["CONFIRMADO", "EXPORTADO"] };
+        }
+
         const orders = await prisma.pedidoVenta.findMany({
-            where: {
-                fecha_pedido: new Date(date),
-                estado: "CONFIRMADO"
-            },
+            where: whereClause,
             include: {
                 cliente: true,
                 lineas: {
@@ -32,7 +43,10 @@ export async function getOrdersForExport(date: string) {
 
         // Group by Client
         const clientsMap = new Map();
+        const productsMap = new Map();
+
         orders.forEach(order => {
+            // Clients aggregation
             if (!clientsMap.has(order.cliente_id)) {
                 clientsMap.set(order.cliente_id, {
                     id: order.cliente.id,
@@ -44,8 +58,26 @@ export async function getOrdersForExport(date: string) {
             }
             const client = clientsMap.get(order.cliente_id);
             client.pedidos_count += 1;
-            // Sum boxes from lines
-            const boxes = order.lineas.reduce((acc, line) => acc + line.cajas, 0);
+
+            // Lines aggregation
+            const boxes = order.lineas.reduce((acc, line) => {
+                // Product Aggregation
+                const productKey = `${line.producto.id}-${line.variante_id || 'null'}-${line.empaque_id || 'null'}`;
+                if (!productsMap.has(productKey)) {
+                    productsMap.set(productKey, {
+                        id: productKey,
+                        nombre: line.producto.nombre,
+                        variante: line.variante?.nombre || "",
+                        empaque: line.empaque?.nombre || "N/A",
+                        total_cajas: 0
+                    });
+                }
+                const productStats = productsMap.get(productKey);
+                productStats.total_cajas += line.cajas;
+
+                return acc + line.cajas;
+            }, 0);
+
             client.total_cajas += boxes;
         });
 
@@ -54,6 +86,7 @@ export async function getOrdersForExport(date: string) {
             data: {
                 orders,
                 clients: Array.from(clientsMap.values()),
+                products: Array.from(productsMap.values()).sort((a: any, b: any) => b.total_cajas - a.total_cajas),
                 summary: {
                     total_pedidos: orders.length,
                     total_cajas: orders.reduce((acc, o) => acc + o.lineas.reduce((lAcc, l) => lAcc + l.cajas, 0), 0)
@@ -135,5 +168,38 @@ export async function confirmExportacionAction(data: {
     } catch (error) {
         console.error("Error confirming exportacion:", error);
         return { success: false, error: "Error al confirmar exportación" };
+    }
+}
+
+export async function getExportacionById(id: number) {
+    try {
+        const exportacion = await prisma.exportacion.findUnique({
+            where: { id },
+            include: {
+                usuario: { select: { nombre: true } },
+                pedidos: {
+                    include: {
+                        cliente: true,
+                        lineas: {
+                            include: {
+                                producto: true,
+                                variante: true,
+                                tamano: true,
+                                familia: true,
+                                empaque: true,
+                                proveedor: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!exportacion) return { success: false, error: "Exportación no encontrada" };
+
+        return { success: true, data: exportacion };
+    } catch (error) {
+        console.error("Error fetching exportacion:", error);
+        return { success: false, error: "Error al obtener exportación" };
     }
 }

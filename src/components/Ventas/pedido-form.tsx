@@ -46,11 +46,13 @@ export function PedidoForm({ pedidoId }: PedidoFormProps) {
                         id: p.id,
                         codigo: p.codigo,
                         cliente_id: p.cliente_id,
+                        cliente_tipo_facturacion: p.cliente.tipo_facturacion,
                         fecha_pedido: new Date(p.fecha_pedido),
                         descripcion: p.descripcion || "",
                         awd: p.awd || "",
                         moneda: p.moneda || "USD",
                         estado: p.estado,
+                        exportacion_id: p.exportacion_id, // Map export status
                         lineas: p.lineas.map((l: any) => ({
                             ...l,
                             producto_nombre: l.producto.nombre,
@@ -221,13 +223,35 @@ export function PedidoForm({ pedidoId }: PedidoFormProps) {
         }
     };
 
+    // Check if locked
+    const isReadOnly = (formData as any).exportacion_id ? true : false;
+
     // ... rendering ...
 
     return (
         <div className="mx-auto max-w-7xl">
+            {isReadOnly && (
+                <div className="mb-6 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 font-bold flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <span>ESTE PEDIDO ESTÁ EXPORTADO Y BLOQUEADO PARA EDICIÓN</span>
+                </div>
+            )}
+
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <h2 className="text-2xl font-bold text-black dark:text-white">
                     {formData.codigo ? `Pedido ${formData.codigo}` : "Nuevo Pedido de Venta"}
+
+                    {formData.estado && (
+                        <span className={`ml-4 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${formData.estado === 'CONFIRMADO' ? 'bg-green-50 text-green-700 ring-green-600/20' :
+                            formData.estado === 'EXPORTADO' ? 'bg-blue-50 text-blue-700 ring-blue-700/10' :
+                                formData.estado === 'ANULADO' ? 'bg-red-50 text-red-700 ring-red-600/10' :
+                                    'bg-gray-50 text-gray-600 ring-gray-500/10'
+                            }`}>
+                            {formData.estado}
+                        </span>
+                    )}
                 </h2>
 
                 <nav>
@@ -254,12 +278,16 @@ export function PedidoForm({ pedidoId }: PedidoFormProps) {
                         <StepEncabezado
                             data={formData}
                             updateData={updateFormData}
+                            // @ts-ignore
+                            isReadOnly={isReadOnly}
                         />
                     )}
                     {currentStep === 2 && (
                         <StepLineas
                             data={formData}
                             updateData={updateFormData}
+                            // @ts-ignore
+                            isReadOnly={isReadOnly}
                         />
                     )}
                     {currentStep === 3 && (
@@ -267,6 +295,7 @@ export function PedidoForm({ pedidoId }: PedidoFormProps) {
                             data={formData}
                             updateData={updateFormData}
                             onConfirm={handleConfirm}
+                            isReadOnly={isReadOnly}
                         />
                     )}
                 </div>
@@ -283,14 +312,16 @@ export function PedidoForm({ pedidoId }: PedidoFormProps) {
 
                     <div className="flex gap-4 items-center">
                         <span className="text-xs text-gray-300">Paso {currentStep}</span>
-                        {/* Always show Save button */}
-                        <button
-                            onClick={() => handleSubmit(false)}
-                            disabled={loading}
-                            className="rounded border border-primary px-6 py-2 font-medium text-primary hover:bg-primary hover:text-white disabled:opacity-50"
-                        >
-                            {loading ? "Guardando..." : "Solo Guardar"}
-                        </button>
+                        {/* Always show Save button - Disabled if ReadOnly */}
+                        {!isReadOnly && (
+                            <button
+                                onClick={() => handleSubmit(false)}
+                                disabled={loading}
+                                className="rounded border border-primary px-6 py-2 font-medium text-primary hover:bg-primary hover:text-white disabled:opacity-50"
+                            >
+                                {loading ? "Guardando..." : "Solo Guardar"}
+                            </button>
+                        )}
 
                         {currentStep < 3 && (
                             <button
@@ -301,13 +332,23 @@ export function PedidoForm({ pedidoId }: PedidoFormProps) {
                             </button>
                         )}
 
-                        {currentStep === 3 && (
+                        {currentStep === 3 && !isReadOnly && (
                             <button
                                 onClick={handleConfirm}
                                 disabled={loading}
                                 className="rounded bg-green-600 px-8 py-3 font-bold text-white hover:bg-green-700 shadow-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:scale-100"
                             >
                                 {loading ? "Procesando..." : "CONFIRMAR Y FINALIZAR 🚀"}
+                            </button>
+                        )}
+
+                        {/* If Read Only and Step 3, maybe show disabled button or nothing */}
+                        {currentStep === 3 && isReadOnly && (
+                            <button
+                                disabled
+                                className="rounded bg-gray-400 px-8 py-3 font-bold text-white cursor-not-allowed opacity-50"
+                            >
+                                PEDIDO BLOQUEADO
                             </button>
                         )}
                     </div>

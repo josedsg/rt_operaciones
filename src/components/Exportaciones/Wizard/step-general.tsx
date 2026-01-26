@@ -23,7 +23,7 @@ export function StepGeneralInfo({ data, updateData, onNext }: StepGeneralProps) 
     const fetchOrders = async (date: string) => {
         setLoading(true);
         try {
-            const res = await getOrdersForExport(date);
+            const res = await getOrdersForExport(date, null, true);
             if (res.success) {
                 setStats(res.data);
                 // Update parent state with selected orders for next steps

@@ -29,13 +29,21 @@ export function StepEncabezado({ data, updateData, isReadOnly = false }: StepEnc
                 </label>
                 <select
                     value={data.cliente_id}
-                    onChange={(e) => updateData({ cliente_id: Number(e.target.value) })}
+                    onChange={(e) => {
+                        const id = Number(e.target.value);
+                        const client = clientes.find(c => c.id === id);
+                        updateData({
+                            cliente_id: id,
+                            cliente_tipo_facturacion: client?.tipo_facturacion || "GRAVADO"
+                        });
+                    }}
                     disabled={isReadOnly}
                     className="w-full rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary disabled:cursor-not-allowed disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 >
                     <option value={0}>Seleccione un cliente</option>
                     {clientes.map(c => (
                         <option key={c.id} value={c.id}>
+                            {c.tipo_facturacion === 'EXONERADO' ? '🆓 ' : ''}
                             {c.nombre} {c.nombre_comercial ? `(${c.nombre_comercial})` : ""}
                         </option>
                     ))}
@@ -76,7 +84,7 @@ export function StepEncabezado({ data, updateData, isReadOnly = false }: StepEnc
                 <select
                     value={data.estado || "BORRADOR"}
                     onChange={(e) => updateData({ estado: e.target.value })}
-                    disabled={isReadOnly}
+                    disabled={true}
                     className="w-full rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary disabled:cursor-not-allowed disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 >
                     <option value="BORRADOR">BORRADOR</option>

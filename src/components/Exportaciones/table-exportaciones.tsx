@@ -52,7 +52,9 @@ export default function TableExportaciones({ initialData }: TableExportacionesPr
                         key={item.id}
                     >
                         <div className="flex items-center gap-3 p-2.5 xl:p-5">
-                            <p className="font-medium text-black dark:text-white">#{item.id}</p>
+                            <Link href={`/exportaciones/${item.id}`} className="font-medium text-primary hover:underline">
+                                #{item.id}
+                            </Link>
                         </div>
 
                         <div className="flex items-center justify-center p-2.5 xl:p-5">
@@ -69,8 +71,8 @@ export default function TableExportaciones({ initialData }: TableExportacionesPr
 
                         <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
                             <span className={`inline-flex rounded-full bg-opacity-10 py-1 px-3 text-sm font-medium ${item.estado === 'CERRADA' ? 'bg-success text-success' :
-                                    item.estado === 'PROCESADA' ? 'bg-primary text-primary' :
-                                        'bg-warning text-warning'
+                                item.estado === 'PROCESADA' ? 'bg-primary text-primary' :
+                                    'bg-warning text-warning'
                                 }`}>
                                 {item.estado}
                             </span>

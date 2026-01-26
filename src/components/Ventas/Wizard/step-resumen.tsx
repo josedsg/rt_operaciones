@@ -154,21 +154,6 @@ export function StepResumen({ data, updateData, onConfirm, isReadOnly = false }:
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                                 Guardar PDF / Imprimir
                             </button>
-
-                            {/* Confirm Button */}
-                            <button
-                                onClick={onConfirm}
-                                disabled={!onConfirm || isReadOnly}
-                                className={`print:hidden flex items-center gap-2 px-4 py-2 rounded shadow transition-all text-sm font-bold ${onConfirm && !isReadOnly ? "bg-green-600 text-white hover:bg-green-700" : "bg-gray-300 text-gray-500 cursor-not-allowed"}`}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                {onConfirm ? (isReadOnly ? "Solo Lectura" : "Confirmar Pedido") : "Confirmar (N/A)"}
-                            </button>
-
-                            {/* Electronic Key Display (Simulated) */}
-                            <div className="text-[10px] text-gray-500 font-mono text-right max-w-xs break-all">
-                                {electronicKey}
-                            </div>
                         </div>
                     </div>
                     <div className="mt-4 flex justify-between items-end">
@@ -201,13 +186,6 @@ export function StepResumen({ data, updateData, onConfirm, isReadOnly = false }:
                         <h3 className="font-bold text-[#167e35] mb-2 uppercase text-xs tracking-wider">Customer Data:</h3>
                         {clienteFull ? (
                             <>
-                                {/* Electronic Key Display (Simulated) */}
-                                <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 print:hidden">
-                                    <p className="text-xs text-gray-500 mb-1">Clave Numérica (Electronic Key) - 50 dígitos</p>
-                                    <p className="font-mono text-xs break-all tracking-widest text-gray-800 dark:text-gray-200">
-                                        50624000000000000000000000000000000000000000000000
-                                    </p>
-                                </div>
                                 <p className="font-bold text-black dark:text-white uppercase">
                                     {clienteFull.nombre_comercial || clienteFull.nombre}
                                 </p>
@@ -234,10 +212,9 @@ export function StepResumen({ data, updateData, onConfirm, isReadOnly = false }:
                 {/* Invoice Meta Grid */}
                 <div className="grid grid-cols-3 text-center border-b border-stroke dark:border-strokedark">
                     <div className="border-r border-stroke dark:border-strokedark">
-                        <div className="bg-[#167e35] text-white font-bold text-xs uppercase py-1">Invoice (Clave)</div>
-                        {/* Changed to show Electronic Key as requested */}
+                        <div className="bg-[#167e35] text-white font-bold text-xs uppercase py-1">Invoice</div>
                         <div className="py-2 text-[10px] font-bold text-danger break-all px-2 leading-tight">
-                            {electronicKey || data.numero_factura || "DRAFT"}
+                            {data.numero_factura || "DRAFT"}
                         </div>
                     </div>
                     <div className="border-r border-stroke dark:border-strokedark">
@@ -262,20 +239,22 @@ export function StepResumen({ data, updateData, onConfirm, isReadOnly = false }:
                                 <span className="text-xs font-bold w-16">Agency:</span>
                                 <input
                                     type="text"
-                                    className="flex-1 text-xs border-b border-gray-300 outline-none p-1 bg-transparent"
+                                    className="flex-1 text-xs border-b border-gray-300 outline-none p-1 bg-transparent disabled:cursor-not-allowed disabled:opacity-50"
                                     placeholder="Agency Name"
                                     value={data.agencia || ""}
                                     onChange={(e) => updateData({ agencia: e.target.value })}
+                                    disabled={isReadOnly}
                                 />
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className="text-xs font-bold w-16">Terminal:</span>
                                 <input
                                     type="text"
-                                    className="flex-1 text-xs border-b border-gray-300 outline-none p-1 bg-transparent"
+                                    className="flex-1 text-xs border-b border-gray-300 outline-none p-1 bg-transparent disabled:cursor-not-allowed disabled:opacity-50"
                                     placeholder="Terminal Info"
                                     value={data.terminal || ""}
                                     onChange={(e) => updateData({ terminal: e.target.value })}
+                                    disabled={isReadOnly}
                                 />
                             </div>
                         </div>
@@ -287,9 +266,10 @@ export function StepResumen({ data, updateData, onConfirm, isReadOnly = false }:
                             <div className="bg-[#167e35] text-white font-bold text-xs uppercase py-1 text-center">Salesperson</div>
                             <div className="flex-1 flex items-center justify-center p-1">
                                 <select
-                                    className="text-xs text-center w-full bg-transparent outline-none h-full"
+                                    className="text-xs text-center w-full bg-transparent outline-none h-full disabled:cursor-not-allowed disabled:opacity-50"
                                     value={data.usuario_id || ""}
                                     onChange={(e) => updateData({ usuario_id: Number(e.target.value) })}
+                                    disabled={isReadOnly}
                                 >
                                     <option value="">Select User</option>
                                     {usuarios.map(u => (
@@ -396,6 +376,23 @@ export function StepResumen({ data, updateData, onConfirm, isReadOnly = false }:
                     </div>
                 </div>
 
+                {/* Electronic Invoice CR Data (New Section) */}
+                <div className="px-8 pb-4">
+                    <div className="border-t-2 border-[#167e35] pt-2 mt-4 mb-4">
+                        <h4 className="font-bold text-[#167e35] text-xs uppercase mb-2">Electronic Invoice CR Data</h4>
+                        <div className="grid grid-cols-1 gap-1 text-[10px] font-mono text-gray-600">
+                            <div className="flex gap-2">
+                                <span className="font-bold w-24">Consecutive:</span>
+                                <span>{data.numero_factura || "N/A"}</span>
+                            </div>
+                            <div className="flex gap-2">
+                                <span className="font-bold w-24">Electronic Key:</span>
+                                <span className="break-all">{electronicKey || "N/A"}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Footer Legal & Banner */}
                 <div className="p-0 border-t border-stroke dark:border-strokedark">
                     {/* Legal Text */}
@@ -444,20 +441,22 @@ export function StepResumen({ data, updateData, onConfirm, isReadOnly = false }:
                             <input
                                 type="text"
                                 placeholder="Ej. 00100001010000..."
-                                className="w-full rounded border border-stroke bg-gray-50 py-3 px-4 dark:bg-meta-4 focus:border-primary outline-none text-sm font-mono"
+                                className="w-full rounded border border-stroke bg-gray-50 py-3 px-4 dark:bg-meta-4 focus:border-primary outline-none text-sm font-mono disabled:cursor-not-allowed disabled:opacity-50"
                                 value={data.numero_factura || ""}
                                 onChange={(e) => updateData({ numero_factura: e.target.value })}
+                                disabled={isReadOnly}
                             />
                         </div>
                         <div>
                             <label className="mb-1 block text-xs font-bold text-gray-500 uppercase">Estado Hacienda</label>
                             <select
-                                className={`w-full rounded border border-stroke py-3 px-4 outline-none text-sm font-bold ${data.estado_factura === 'ACEPTADO' ? 'bg-success/10 text-success border-success' :
+                                className={`w-full rounded border border-stroke py-3 px-4 outline-none text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50 ${data.estado_factura === 'ACEPTADO' ? 'bg-success/10 text-success border-success' :
                                     data.estado_factura === 'RECHAZADO' ? 'bg-danger/10 text-danger border-danger' :
                                         'bg-white dark:bg-boxdark'
                                     }`}
                                 value={data.estado_factura || "PENDIENTE"}
                                 onChange={(e) => updateData({ estado_factura: e.target.value })}
+                                disabled={isReadOnly}
                             >
                                 <option value="PENDIENTE">PENDIENTE DE ENVÍO</option>
                                 <option value="ENVIADO">ENVIADO (Procesando)</option>
@@ -483,10 +482,12 @@ export function StepResumen({ data, updateData, onConfirm, isReadOnly = false }:
                                 </div>
                             </div>
                             <div>
-                                <input type="file" accept=".pdf" className="hidden" id="pdf_file" onChange={(e) => handleFileChange(e, "pdf")} />
-                                <label htmlFor="pdf_file" className="cursor-pointer text-xs font-bold text-primary hover:underline">
-                                    {data.pdf_factura ? "Reemplazar" : "Subir PDF"}
-                                </label>
+                                <input type="file" accept=".pdf" className="hidden" id="pdf_file" onChange={(e) => handleFileChange(e, "pdf")} disabled={isReadOnly} />
+                                {!isReadOnly && (
+                                    <label htmlFor="pdf_file" className="cursor-pointer text-xs font-bold text-primary hover:underline">
+                                        {data.pdf_factura ? "Reemplazar" : "Subir PDF"}
+                                    </label>
+                                )}
                             </div>
                         </div>
 
@@ -502,10 +503,12 @@ export function StepResumen({ data, updateData, onConfirm, isReadOnly = false }:
                                     </div>
                                 </div>
                                 <div>
-                                    <input type="file" accept=".xml" className="hidden" id="xml_envio" onChange={(e) => handleFileChange(e, "xml_envio")} />
-                                    <label htmlFor="xml_envio" className="cursor-pointer text-[10px] font-bold text-primary hover:underline">
-                                        {data.xml_envio ? "Update" : "Subir"}
-                                    </label>
+                                    <input type="file" accept=".xml" className="hidden" id="xml_envio" onChange={(e) => handleFileChange(e, "xml_envio")} disabled={isReadOnly} />
+                                    {!isReadOnly && (
+                                        <label htmlFor="xml_envio" className="cursor-pointer text-[10px] font-bold text-primary hover:underline">
+                                            {data.xml_envio ? "Update" : "Subir"}
+                                        </label>
+                                    )}
                                 </div>
                             </div>
                             <div className="flex items-center justify-between p-3 border border-stroke dark:border-strokedark rounded bg-gray-50 dark:bg-meta-4">
@@ -518,10 +521,12 @@ export function StepResumen({ data, updateData, onConfirm, isReadOnly = false }:
                                     </div>
                                 </div>
                                 <div>
-                                    <input type="file" accept=".xml" className="hidden" id="xml_respuesta" onChange={(e) => handleFileChange(e, "xml_respuesta")} />
-                                    <label htmlFor="xml_respuesta" className="cursor-pointer text-[10px] font-bold text-primary hover:underline">
-                                        {data.xml_respuesta ? "Update" : "Subir"}
-                                    </label>
+                                    <input type="file" accept=".xml" className="hidden" id="xml_respuesta" onChange={(e) => handleFileChange(e, "xml_respuesta")} disabled={isReadOnly} />
+                                    {!isReadOnly && (
+                                        <label htmlFor="xml_respuesta" className="cursor-pointer text-[10px] font-bold text-primary hover:underline">
+                                            {data.xml_respuesta ? "Update" : "Subir"}
+                                        </label>
+                                    )}
                                 </div>
                             </div>
                         </div>

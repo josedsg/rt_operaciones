@@ -1,0 +1,1139 @@
+{
+  "LISTAS_MAESTRAS": {
+    "GRUPOS": [
+      "FRESH CUT FLOWERS",
+      "REGULAR GREENS",
+      "TROPICAL FLOWERS",
+      "TROPICAL GREENS"
+    ],
+    "FAMILIAS": [
+      "AGAPANTHUS PRAECOX",
+      "ALPINIA PURPURATA",
+      "AMMI MAJUS",
+      "ASTILBE ARENDSII",
+      "ASTILBE JAPONICA",
+      "COSTUS",
+      "EUCALYPTUS SPP",
+      "GINGER TORCH",
+      "HELICONIA HANGING",
+      "STRELITZIA REGINAE"
+    ],
+    "VARIANTES_COLOR": [
+      "ASSORTED",
+      "BIRD OF PARADISE LEAVES",
+      "BLUE",
+      "BLUSH - MILK & HONEY",
+      "CINEREA TRUE BLUE",
+      "FRENCH KISS",
+      "GUNNII",
+      "LIGHT PINK - ERICKA",
+      "LIGHT PINK - EUROPA",
+      "LILAC - AMETHYST",
+      "ORANGE - BIRD OF PARADISE",
+      "PARVIFOLIA",
+      "PINK - CATTLEYA",
+      "PINK - EUROPA ALTO",
+      "PINK - GRANAT",
+      "PINK - HENNIE",
+      "PINK - HONEY TONK",
+      "PINK - ROSADO",
+      "POLIANTEMOS SILVER DOLLAR",
+      "PURPLE - MORADO",
+      "PURPLE - TAQUETII",
+      "RED",
+      "RED & PINK",
+      "RED - ALIVE & KICKING",
+      "RED - ELSE SCHLUCK",
+      "RED - FANAL",
+      "RED - GLUT",
+      "RED - LOVE & PRIDE",
+      "RED - PAUL GAARDER",
+      "SEXY PINK",
+      "SEXY SCARLET, ROSTRATA, SEXY ORANGE",
+      "SHE KONG",
+      "WHITE",
+      "WHITE - BRAUTSCHLEIER",
+      "WHITE - DIAMANT",
+      "WHITE - WASHINGTON"
+    ],
+    "TAMANOS_GRADO": [
+      "100 CM",
+      "40+ CM",
+      "50 - 60 CM",
+      "50+ CM",
+      "55+ CM",
+      "70+ CM",
+      "90 CM",
+      "LARGE",
+      "MEDIUM",
+      "MINI",
+      "PREMIUM - 60+ CM",
+      "PREMIUM - 80 CM",
+      "SELECT - 70 CM",
+      "SMALL"
+    ],
+    "EMPAQUES": [
+      "BULK",
+      "CB"
+    ],
+    "BOX_TYPES": [
+      {
+        "BOX_TYPE": "EB",
+        "EMPAQUE": "BULK",
+        "DIMENSIONES": {
+          "STEM_PER_BUNCH": [
+            10
+          ],
+          "BUNCHES_PER_BOX": [
+            5
+          ],
+          "STEM_PER_BOX": [
+            50
+          ]
+        }
+      },
+      {
+        "BOX_TYPE": "EB FRESCA",
+        "EMPAQUE": "BULK",
+        "DIMENSIONES": {
+          "STEM_PER_BUNCH": [
+            10
+          ],
+          "BUNCHES_PER_BOX": [
+            10,
+            12
+          ],
+          "STEM_PER_BOX": [
+            100,
+            120
+          ]
+        }
+      },
+      {
+        "BOX_TYPE": "EB HOLEX",
+        "EMPAQUE": "BULK",
+        "DIMENSIONES": {
+          "STEM_PER_BUNCH": [
+            10
+          ],
+          "BUNCHES_PER_BOX": [
+            12
+          ],
+          "STEM_PER_BOX": [
+            120
+          ]
+        }
+      },
+      {
+        "BOX_TYPE": "EB JET FRESH",
+        "EMPAQUE": "BULK",
+        "DIMENSIONES": {
+          "STEM_PER_BUNCH": [
+            10
+          ],
+          "BUNCHES_PER_BOX": [
+            12
+          ],
+          "STEM_PER_BOX": [
+            120
+          ]
+        }
+      },
+      {
+        "BOX_TYPE": "EB KRAFT",
+        "EMPAQUE": "BULK",
+        "DIMENSIONES": {
+          "STEM_PER_BUNCH": [
+            10
+          ],
+          "BUNCHES_PER_BOX": [
+            10,
+            12
+          ],
+          "STEM_PER_BOX": [
+            100,
+            120
+          ]
+        }
+      },
+      {
+        "BOX_TYPE": "EB SOLE",
+        "EMPAQUE": "BULK",
+        "DIMENSIONES": {
+          "STEM_PER_BUNCH": [
+            10
+          ],
+          "BUNCHES_PER_BOX": [
+            10
+          ],
+          "STEM_PER_BOX": [
+            100
+          ]
+        }
+      },
+      {
+        "BOX_TYPE": "EB SOLÉ",
+        "EMPAQUE": "BULK",
+        "DIMENSIONES": {
+          "STEM_PER_BUNCH": [
+            10
+          ],
+          "BUNCHES_PER_BOX": [
+            10,
+            12
+          ],
+          "STEM_PER_BOX": [
+            100,
+            120
+          ]
+        }
+      },
+      {
+        "BOX_TYPE": "FB",
+        "EMPAQUE": "BULK",
+        "DIMENSIONES": {
+          "STEM_PER_BUNCH": [
+            5,
+            10
+          ],
+          "BUNCHES_PER_BOX": [
+            3,
+            5
+          ],
+          "STEM_PER_BOX": [
+            15,
+            50
+          ]
+        }
+      },
+      {
+        "BOX_TYPE": "HB",
+        "EMPAQUE": "BULK",
+        "DIMENSIONES": {
+          "STEM_PER_BUNCH": [
+            5,
+            10
+          ],
+          "BUNCHES_PER_BOX": [
+            5
+          ],
+          "STEM_PER_BOX": [
+            25,
+            50
+          ]
+        }
+      },
+      {
+        "BOX_TYPE": "QB",
+        "EMPAQUE": "BULK",
+        "DIMENSIONES": {
+          "STEM_PER_BUNCH": [
+            10
+          ],
+          "BUNCHES_PER_BOX": [
+            8,
+            10
+          ],
+          "STEM_PER_BOX": [
+            80,
+            100
+          ]
+        }
+      },
+      {
+        "BOX_TYPE": "QB FRESCA",
+        "EMPAQUE": "BULK",
+        "DIMENSIONES": {
+          "STEM_PER_BUNCH": [
+            10
+          ],
+          "BUNCHES_PER_BOX": [
+            4,
+            5,
+            10
+          ],
+          "STEM_PER_BOX": [
+            40,
+            50,
+            100
+          ]
+        }
+      },
+      {
+        "BOX_TYPE": "QB HOLEX",
+        "EMPAQUE": "BULK",
+        "DIMENSIONES": {
+          "STEM_PER_BUNCH": [
+            10
+          ],
+          "BUNCHES_PER_BOX": [
+            5,
+            10
+          ],
+          "STEM_PER_BOX": [
+            50,
+            100
+          ]
+        }
+      },
+      {
+        "BOX_TYPE": "QB JET FRESH",
+        "EMPAQUE": "BULK",
+        "DIMENSIONES": {
+          "STEM_PER_BUNCH": [
+            10
+          ],
+          "BUNCHES_PER_BOX": [
+            5,
+            10
+          ],
+          "STEM_PER_BOX": [
+            50,
+            100
+          ]
+        }
+      },
+      {
+        "BOX_TYPE": "QB KRAFT",
+        "EMPAQUE": "BULK",
+        "DIMENSIONES": {
+          "STEM_PER_BUNCH": [
+            10
+          ],
+          "BUNCHES_PER_BOX": [
+            4,
+            5,
+            6,
+            10
+          ],
+          "STEM_PER_BOX": [
+            40,
+            50,
+            60,
+            100
+          ]
+        }
+      },
+      {
+        "BOX_TYPE": "QB SOLÉ",
+        "EMPAQUE": "BULK",
+        "DIMENSIONES": {
+          "STEM_PER_BUNCH": [
+            10
+          ],
+          "BUNCHES_PER_BOX": [
+            5,
+            10
+          ],
+          "STEM_PER_BOX": [
+            50,
+            100
+          ]
+        }
+      },
+      {
+        "BOX_TYPE": "EB FRESCA",
+        "EMPAQUE": "CB",
+        "DIMENSIONES": {
+          "STEM_PER_BUNCH": [
+            4
+          ],
+          "BUNCHES_PER_BOX": [
+            12
+          ],
+          "STEM_PER_BOX": [
+            48
+          ]
+        }
+      },
+      {
+        "BOX_TYPE": "EB KRAFT",
+        "EMPAQUE": "CB",
+        "DIMENSIONES": {
+          "STEM_PER_BUNCH": [
+            5
+          ],
+          "BUNCHES_PER_BOX": [
+            20
+          ],
+          "STEM_PER_BOX": [
+            100
+          ]
+        }
+      }
+    ]
+  },
+  "JERARQUIA": [
+    {
+      "GRUPO": "FRESH CUT FLOWERS",
+      "FAMILIAS": [
+        {
+          "FAMILIA": "AGAPANTHUS PRAECOX",
+          "VARIANTES_COLOR": [
+            "BLUE"
+          ],
+          "TAMANOS_GRADO": [
+            "PREMIUM - 80 CM",
+            "SELECT - 70 CM"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                {
+                  "BOX_TYPE": "QB FRESCA",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      5
+                    ],
+                    "STEM_PER_BOX": [
+                      50
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "QB HOLEX",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      5
+                    ],
+                    "STEM_PER_BOX": [
+                      50
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "QB JET FRESH",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      5
+                    ],
+                    "STEM_PER_BOX": [
+                      50
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "QB KRAFT",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      5,
+                      6
+                    ],
+                    "STEM_PER_BOX": [
+                      50,
+                      60
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "QB SOLÉ",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      5
+                    ],
+                    "STEM_PER_BOX": [
+                      50
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "FAMILIA": "AMMI MAJUS",
+          "VARIANTES_COLOR": [
+            "WHITE"
+          ],
+          "TAMANOS_GRADO": [
+            "70+ CM"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                {
+                  "BOX_TYPE": "QB FRESCA",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      10
+                    ],
+                    "STEM_PER_BOX": [
+                      100
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "QB HOLEX",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      10
+                    ],
+                    "STEM_PER_BOX": [
+                      100
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "QB JET FRESH",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      10
+                    ],
+                    "STEM_PER_BOX": [
+                      100
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "QB KRAFT",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      10
+                    ],
+                    "STEM_PER_BOX": [
+                      100
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "QB SOLÉ",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      10
+                    ],
+                    "STEM_PER_BOX": [
+                      100
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "FAMILIA": "ASTILBE ARENDSII",
+          "VARIANTES_COLOR": [
+            "BLUSH - MILK & HONEY",
+            "LIGHT PINK - ERICKA",
+            "LILAC - AMETHYST",
+            "PINK - CATTLEYA",
+            "PINK - GRANAT",
+            "PINK - HENNIE",
+            "PINK - HONEY TONK",
+            "PINK - ROSADO",
+            "PURPLE - MORADO",
+            "PURPLE - TAQUETII",
+            "RED - ALIVE & KICKING",
+            "RED - ELSE SCHLUCK",
+            "RED - GLUT",
+            "RED - LOVE & PRIDE",
+            "RED - PAUL GAARDER",
+            "WHITE - BRAUTSCHLEIER",
+            "WHITE - DIAMANT"
+          ],
+          "TAMANOS_GRADO": [
+            "40+ CM",
+            "50+ CM",
+            "55+ CM"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                {
+                  "BOX_TYPE": "EB FRESCA",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      10,
+                      12
+                    ],
+                    "STEM_PER_BOX": [
+                      100,
+                      120
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "EB HOLEX",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      12
+                    ],
+                    "STEM_PER_BOX": [
+                      120
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "EB JET FRESH",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      12
+                    ],
+                    "STEM_PER_BOX": [
+                      120
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "EB KRAFT",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      10,
+                      12
+                    ],
+                    "STEM_PER_BOX": [
+                      100,
+                      120
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "EB SOLE",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      10
+                    ],
+                    "STEM_PER_BOX": [
+                      100
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "EB SOLÉ",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      10
+                    ],
+                    "STEM_PER_BOX": [
+                      100
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "FAMILIA": "ASTILBE JAPONICA",
+          "VARIANTES_COLOR": [
+            "ASSORTED",
+            "LIGHT PINK - EUROPA",
+            "PINK - EUROPA ALTO",
+            "RED - FANAL",
+            "WHITE - WASHINGTON"
+          ],
+          "TAMANOS_GRADO": [
+            "40+ CM",
+            "50+ CM",
+            "55+ CM"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                {
+                  "BOX_TYPE": "EB FRESCA",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      12
+                    ],
+                    "STEM_PER_BOX": [
+                      120
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "EB HOLEX",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      12
+                    ],
+                    "STEM_PER_BOX": [
+                      120
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "EB JET FRESH",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      12
+                    ],
+                    "STEM_PER_BOX": [
+                      120
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "EB KRAFT",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      10,
+                      12
+                    ],
+                    "STEM_PER_BOX": [
+                      100,
+                      120
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "EB SOLÉ",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      10,
+                      12
+                    ],
+                    "STEM_PER_BOX": [
+                      100,
+                      120
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "EMPAQUE": "CB",
+              "BOX_TYPES": [
+                {
+                  "BOX_TYPE": "EB FRESCA",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      4
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      12
+                    ],
+                    "STEM_PER_BOX": [
+                      48
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "EB KRAFT",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      5
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      20
+                    ],
+                    "STEM_PER_BOX": [
+                      100
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "GRUPO": "REGULAR GREENS",
+      "FAMILIAS": [
+        {
+          "FAMILIA": "EUCALYPTUS SPP",
+          "VARIANTES_COLOR": [
+            "ASSORTED",
+            "CINEREA TRUE BLUE",
+            "GUNNII",
+            "PARVIFOLIA",
+            "POLIANTEMOS SILVER DOLLAR"
+          ],
+          "TAMANOS_GRADO": [
+            "50 - 60 CM"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                {
+                  "BOX_TYPE": "QB",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      8,
+                      10
+                    ],
+                    "STEM_PER_BOX": [
+                      80,
+                      100
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "GRUPO": "TROPICAL FLOWERS",
+      "FAMILIAS": [
+        {
+          "FAMILIA": "ALPINIA PURPURATA",
+          "VARIANTES_COLOR": [
+            "ASSORTED",
+            "RED"
+          ],
+          "TAMANOS_GRADO": [
+            "LARGE",
+            "MEDIUM",
+            "MINI",
+            "SMALL"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                {
+                  "BOX_TYPE": "EB",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      5
+                    ],
+                    "STEM_PER_BOX": [
+                      50
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "FB",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      5
+                    ],
+                    "STEM_PER_BOX": [
+                      50
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "HB",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      5
+                    ],
+                    "STEM_PER_BOX": [
+                      50
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "FAMILIA": "COSTUS",
+          "VARIANTES_COLOR": [
+            "FRENCH KISS"
+          ],
+          "TAMANOS_GRADO": [
+            "100 CM"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                {
+                  "BOX_TYPE": "HB",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      5
+                    ],
+                    "STEM_PER_BOX": [
+                      50
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "FAMILIA": "GINGER TORCH",
+          "VARIANTES_COLOR": [
+            "RED & PINK"
+          ],
+          "TAMANOS_GRADO": [
+            "90 CM"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                {
+                  "BOX_TYPE": "HB",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      5
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      5
+                    ],
+                    "STEM_PER_BOX": [
+                      25
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "FAMILIA": "HELICONIA HANGING",
+          "VARIANTES_COLOR": [
+            "SEXY PINK",
+            "SEXY SCARLET, ROSTRATA, SEXY ORANGE",
+            "SHE KONG"
+          ],
+          "TAMANOS_GRADO": [
+            "90 CM"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                {
+                  "BOX_TYPE": "FB",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      5
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      3
+                    ],
+                    "STEM_PER_BOX": [
+                      15
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "FAMILIA": "STRELITZIA REGINAE",
+          "VARIANTES_COLOR": [
+            "ORANGE - BIRD OF PARADISE"
+          ],
+          "TAMANOS_GRADO": [
+            "PREMIUM - 80 CM"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                {
+                  "BOX_TYPE": "QB FRESCA",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      4,
+                      5
+                    ],
+                    "STEM_PER_BOX": [
+                      40,
+                      50
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "QB HOLEX",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      5
+                    ],
+                    "STEM_PER_BOX": [
+                      50
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "QB JET FRESH",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      5
+                    ],
+                    "STEM_PER_BOX": [
+                      50
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "QB KRAFT",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      4,
+                      5
+                    ],
+                    "STEM_PER_BOX": [
+                      40,
+                      50
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "QB SOLÉ",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      5
+                    ],
+                    "STEM_PER_BOX": [
+                      50
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "GRUPO": "TROPICAL GREENS",
+      "FAMILIAS": [
+        {
+          "FAMILIA": "STRELITZIA REGINAE",
+          "VARIANTES_COLOR": [
+            "BIRD OF PARADISE LEAVES"
+          ],
+          "TAMANOS_GRADO": [
+            "PREMIUM - 60+ CM"
+          ],
+          "EMPAQUES": [
+            {
+              "EMPAQUE": "BULK",
+              "BOX_TYPES": [
+                {
+                  "BOX_TYPE": "QB JET FRESH",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      5
+                    ],
+                    "STEM_PER_BOX": [
+                      50
+                    ]
+                  }
+                },
+                {
+                  "BOX_TYPE": "QB KRAFT",
+                  "DIMENSIONES": {
+                    "STEM_PER_BUNCH": [
+                      10
+                    ],
+                    "BUNCHES_PER_BOX": [
+                      5
+                    ],
+                    "STEM_PER_BOX": [
+                      50
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "NOTA": "LAS DIMENSIONES SE DEFINEN A NIVEL DE BOX_TYPE (DEPENDEN DE EMPAQUE)"
+}
