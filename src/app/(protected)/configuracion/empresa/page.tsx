@@ -15,7 +15,16 @@ export default async function CompanyConfigPage() {
         <>
             <Breadcrumb pageName="Datos Empresa" />
             <div className="mx-auto max-w-270">
-                <CompanyForm initialData={companyData} />
+                <CompanyForm
+                    initialData={companyData ? {
+                        ...companyData,
+                        telefono: companyData.telefono ?? undefined,
+                        email: companyData.email ?? undefined,
+                        website: companyData.website ?? undefined,
+                        ein_number: companyData.ein_number ?? undefined,
+                        logo_url: companyData.logo_url ?? undefined,
+                    } : undefined}
+                />
             </div>
         </>
     );

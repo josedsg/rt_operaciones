@@ -17,7 +17,6 @@ export default async function EditarClientePage({ params }: EditarClientePagePro
         <>
             <Breadcrumb
                 pageName="Editar Cliente"
-                parentName="Riotapezco-Operaciones"
             />
 
             <div className="mx-auto max-w-270">

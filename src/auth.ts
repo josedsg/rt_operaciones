@@ -15,13 +15,15 @@ async function getUser(email: string) {
     }
 }
 
+console.log("Auth Initializing. Secret present:", !!process.env.AUTH_SECRET, "TrustHost:", process.env.AUTH_TRUST_HOST);
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig,
     providers: [
         Credentials({
             async authorize(credentials) {
                 const parsedCredentials = z
-                    .object({ email: z.string().email(), password: z.string().min(6) })
+                    .object({ email: z.string().email(), password: z.string().min(5) })
                     .safeParse(credentials);
 
                 if (parsedCredentials.success) {
@@ -30,7 +32,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     if (!user) return null;
                     const passwordsMatch = await bcrypt.compare(password, user.password);
 
-                    if (passwordsMatch) return user;
+                    if (passwordsMatch) {
+                        return {
+                            ...user,
+                            id: user.id.toString(),
+                        };
+                    }
                 }
                 console.log("Invalid credentials");
                 return null;

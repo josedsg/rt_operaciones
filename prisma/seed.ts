@@ -191,6 +191,26 @@ async function main() {
     } else {
         console.warn('Skipping Client Seed: Missing dependencies (maybe Fetch failed?)');
     }
+
+    // 6. Default Admin User
+    console.log('Seeding Admin User...');
+    const adminEmail = 'admin@admin.com';
+    const adminPassword = await bcrypt.hash('admin', 10);
+
+    const existingAdmin = await prisma.usuario.findUnique({ where: { email: adminEmail } });
+    if (!existingAdmin) {
+        await prisma.usuario.create({
+            data: {
+                nombre: 'Admin',
+                email: adminEmail,
+                password: adminPassword,
+                rol: 'ADMIN'
+            }
+        });
+        console.log('Admin User Created: admin@admin.com / admin');
+    } else {
+        console.log('Admin User already exists');
+    }
 }
 
 main()

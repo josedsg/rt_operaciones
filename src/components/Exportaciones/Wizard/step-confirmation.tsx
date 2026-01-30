@@ -168,7 +168,7 @@ export function StepConfirmation({ data, onPrev, currentUserId }: StepConfirmati
                 const invoices = data.pedidos_seleccionados.map((o: any) => o.numero_factura || "S/N").filter((n: string) => n !== "S/N");
 
                 setSuccessData({
-                    id: res.data.id,
+                    id: res.data?.id || 0,
                     ordersCount: data.pedidos_seleccionados.length,
                     clients: uniqueClients,
                     invoices: invoices
