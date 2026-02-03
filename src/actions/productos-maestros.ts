@@ -47,13 +47,39 @@ export async function generateProductosFromConfigAction(familiaId: number) {
                 continue;
             }
 
-            // 4. Create Name & Description
+            // 4. Create Name & Description & Code
             const nombreProducto = familia.nombre_cientifico;
             const descripcionProducto = `Variante: ${config.variante.nombre} - Tamaño: ${config.tamano.nombre}`;
+
+            // Auto-generate code: FAM-001
+            // 1. Get Prefix
+            const fCode = familia.nombre_cientifico.substring(0, 3).toUpperCase();
+
+            // 2. Find max current code for this prefix
+            const existingCodes = await prisma.productoMaestro.findMany({
+                where: { codigo: { startsWith: `${fCode}-` } },
+                select: { codigo: true }
+            });
+
+            let maxNum = 0;
+            existingCodes.forEach(p => {
+                const parts = p.codigo?.split('-');
+                if (parts && parts.length >= 2) {
+                    const num = parseInt(parts[1], 10);
+                    if (!isNaN(num) && num > maxNum) {
+                        maxNum = num;
+                    }
+                }
+            });
+
+            // 3. Assign Next
+            const nextNum = maxNum + 1;
+            const codigo = `${fCode}-${nextNum.toString().padStart(3, '0')}`;
 
             // 5. Create
             const productData = toUpperCaseFields({
                 nombre: nombreProducto,
+                codigo: codigo,
                 descripcion: descripcionProducto,
                 familia_id: familiaId,
                 variante_id: config.variante_id!,
@@ -117,6 +143,7 @@ export async function getProductosMaestrosAction({
         if (search) {
             where.OR = [
                 { nombre: { contains: search, mode: "insensitive" } },
+                { codigo: { contains: search, mode: "insensitive" } },
                 { descripcion: { contains: search, mode: "insensitive" } },
                 { familia: { nombre_cientifico: { contains: search, mode: "insensitive" } } },
             ];
@@ -169,8 +196,48 @@ export async function createProductoMaestroAction(formData: FormData) {
 
         const empaques_ids = formData.get("empaques") ? (formData.get("empaques") as string).split(",").map(Number) : [];
 
+        // Auto-generate Code if not provided (though this action is manual creation, we should support auto-gen too)
+        // Need to fetch names to generate code if we want to support it here. 
+        // For simplicity, if manual creation, let's try to generate if missing using IDs? 
+        // Or better, fetch the relations to generate the code.
+
+        let codigo = formData.get("codigo") as string;
+
+        if (!codigo) {
+            const [f, v, t] = await Promise.all([
+                prisma.familia.findUnique({ where: { id: familia_id } }),
+                prisma.variante.findUnique({ where: { id: variante_id } }),
+                prisma.tamano.findUnique({ where: { id: tamano_id } })
+            ]);
+
+            if (f && v && t) {
+                // Auto-generate code: FAM-001
+                const fCode = f.nombre_cientifico.substring(0, 3).toUpperCase();
+
+                const existingCodes = await prisma.productoMaestro.findMany({
+                    where: { codigo: { startsWith: `${fCode}-` } },
+                    select: { codigo: true }
+                });
+
+                let maxNum = 0;
+                existingCodes.forEach(p => {
+                    const parts = p.codigo?.split('-');
+                    if (parts && parts.length >= 2) {
+                        const num = parseInt(parts[1], 10);
+                        if (!isNaN(num) && num > maxNum) {
+                            maxNum = num;
+                        }
+                    }
+                });
+
+                const nextNum = maxNum + 1;
+                codigo = `${fCode}-${nextNum.toString().padStart(3, '0')}`;
+            }
+        }
+
         const rawData = {
             nombre,
+            codigo,
             descripcion,
             familia_id,
             variante_id,
@@ -210,10 +277,13 @@ export async function updateProductoMaestroAction(formData: FormData) {
         const variante_id = parseInt(formData.get("variante_id") as string);
         const tamano_id = parseInt(formData.get("tamano_id") as string);
 
+        const codigo = formData.get("codigo") as string;
+
         const empaques_ids = formData.get("empaques") ? (formData.get("empaques") as string).split(",").map(Number) : [];
 
         const rawData = {
             nombre,
+            codigo,
             descripcion,
             familia_id,
             variante_id,

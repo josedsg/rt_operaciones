@@ -34,7 +34,9 @@ export function StepEncabezado({ data, updateData, isReadOnly = false }: StepEnc
                         const client = clientes.find(c => c.id === id);
                         updateData({
                             cliente_id: id,
-                            cliente_tipo_facturacion: client?.tipo_facturacion || "GRAVADO"
+                            cliente_tipo_facturacion: client?.tipo_facturacion || "GRAVADO",
+                            agencia: (client as any)?.agencia?.nombre || "",
+                            terminal: (client as any)?.terminal?.nombre || ""
                         });
                     }}
                     disabled={isReadOnly}

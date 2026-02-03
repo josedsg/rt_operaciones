@@ -44,6 +44,28 @@ model TerminosPago {
   @@map("terminos_pago")
 }
 
+model Terminal {
+  id                 Int       @id @default(autoincrement())
+  nombre             String
+  descripcion        String?   @db.Text
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  clientes           Cliente[]
+
+  @@map("terminales")
+}
+
+model Agencia {
+  id                 Int       @id @default(autoincrement())
+  nombre             String
+  descripcion        String?   @db.Text
+  fecha_creacion     DateTime? @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  clientes           Cliente[]
+
+  @@map("agencias")
+}
+
 model Pais {
   id                 Int       @id @default(autoincrement())
   nombre             String
@@ -117,8 +139,14 @@ model Cliente {
   email_notificacion String?
   
   // Shipping Defaults
-  agencia            String?
-  terminal           String?
+  // agencia            String? // Replaced by relation
+  // terminal           String? // Replaced by relation
+  
+  agencia_id         Int?
+  agencia            Agencia?  @relation(fields: [agencia_id], references: [id])
+  
+  terminal_id        Int?
+  terminal           Terminal? @relation(fields: [terminal_id], references: [id])
 
   telefono           String?
   sitio_web          String?
@@ -230,6 +258,7 @@ model ConfiguracionPermitida {
 model ProductoMaestro {
   id                 Int       @id @default(autoincrement())
   nombre             String
+  codigo             String?   @unique
   descripcion        String?   @db.Text
   familia_id         Int
   familia            Familia   @relation(fields: [familia_id], references: [id])

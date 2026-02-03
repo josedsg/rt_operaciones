@@ -11,6 +11,14 @@ export async function getTiposIdentificacionAction() {
     return await prisma.tipoIdentificacion.findMany({ orderBy: { id: "asc" } });
 }
 
+export async function getTerminalesAction() {
+    return await prisma.terminal.findMany({ orderBy: { nombre: "asc" } });
+}
+
+export async function getAgenciasAction() {
+    return await prisma.agencia.findMany({ orderBy: { nombre: "asc" } });
+}
+
 export async function getTiposClienteAction() {
     return await prisma.tipoCliente.findMany({ orderBy: { id: "asc" } });
 }
@@ -88,6 +96,8 @@ export async function getClientesAction(
                     provincia: true,
                     canton: true,
                     distrito: true,
+                    agencia: true,
+                    terminal: true
                 },
             }),
             prisma.cliente.count({ where: whereClause })
@@ -139,8 +149,10 @@ export async function createClienteAction(data: any) {
             terminos_pago_id: Number(data.terminos_pago_id),
             fecha_vencimiento_exoneracion: data.fecha_vencimiento_exoneracion ? new Date(data.fecha_vencimiento_exoneracion) : null,
             tipo_facturacion: data.tipo_facturacion || "GRAVADO",
-            agencia: data.agencia || null,
-            terminal: data.terminal || null
+            // agencia: data.agencia || null, // REMOVED
+            // terminal: data.terminal || null // REMOVED
+            agencia_id: Number(data.agencia_id) || null,
+            terminal_id: Number(data.terminal_id) || null
         };
 
         const empaques_ids = data.empaques ? data.empaques.map(Number) : [];
@@ -195,8 +207,8 @@ export async function updateClienteAction(id: number, data: any) {
             terminos_pago_id: Number(data.terminos_pago_id),
             fecha_vencimiento_exoneracion: data.fecha_vencimiento_exoneracion ? new Date(data.fecha_vencimiento_exoneracion) : null,
             tipo_facturacion: data.tipo_facturacion || "GRAVADO",
-            agencia: data.agencia || null,
-            terminal: data.terminal || null
+            agencia_id: Number(data.agencia_id) || null,
+            terminal_id: Number(data.terminal_id) || null
         };
 
         const empaques_ids = data.empaques ? data.empaques.map(Number) : [];

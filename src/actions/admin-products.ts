@@ -180,10 +180,33 @@ export async function uploadInitialData(jsonContent: any) {
                             });
 
                             // 2. Crear Producto Maestro
+                            // Auto-generate code: FAM-001
+                            const fCode = familia.nombre_cientifico.substring(0, 3).toUpperCase();
+
+                            const existingCodes = await tx.productoMaestro.findMany({
+                                where: { codigo: { startsWith: `${fCode}-` } },
+                                select: { codigo: true }
+                            });
+
+                            let maxNum = 0;
+                            existingCodes.forEach(p => {
+                                const parts = p.codigo?.split('-');
+                                if (parts && parts.length >= 2) {
+                                    const num = parseInt(parts[1], 10);
+                                    if (!isNaN(num) && num > maxNum) {
+                                        maxNum = num;
+                                    }
+                                }
+                            });
+
+                            const nextNum = maxNum + 1;
+                            const codigo = `${fCode}-${nextNum.toString().padStart(3, '0')}`;
+
                             const producto = await tx.productoMaestro.create({
                                 data: {
                                     nombre: familia.nombre_cientifico,
                                     descripcion: `Producto generado automáticamente`,
+                                    codigo: codigo,
                                     familia_id: familia.id,
                                     variante_id: variante.id,
                                     tamano_id: tamano.id

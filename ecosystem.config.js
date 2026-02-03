@@ -3,13 +3,15 @@ module.exports = {
         {
             name: "rt_operaciones",
             script: "npm",
-            args: "run dev",
+            args: "run dev", // IMPORTANTE: Usa 'start', no 'run dev'
             env: {
                 NODE_ENV: "production",
-                PORT: 3000,
-                AUTH_TRUST_HOST: "true",
-                AUTH_URL: "http://localhost:3000",
+                // Si usas NextAuth, añade esta línea:
+                NEXTAUTH_URL: "https://rt-dev.neosyscr.com",
+                // Si usas variables personalizadas para redirecciones:
+                NEXT_PUBLIC_BASE_URL: "https://rt-dev.neosyscr.com"
             },
         },
     ],
 };
+

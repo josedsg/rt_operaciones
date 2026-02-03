@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 
 const configMenu = [
     { name: "Tipos de Cliente", href: "/clientes/configuracion/tipos-cliente" },
+    { name: "Terminales", href: "/clientes/configuracion/terminales" },
+    { name: "Agencias", href: "/clientes/configuracion/agencias" },
     { name: "Términos de Pago", href: "/clientes/configuracion/terminos-pago" },
     { name: "Geografía", href: "/clientes/configuracion/geografia" },
 ];
@@ -31,8 +33,8 @@ export default function ConfigLayout({
                                 key={item.href}
                                 href={item.href}
                                 className={`rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-primary hover:text-white ${isActive
-                                        ? "bg-primary text-white"
-                                        : "bg-gray-2 text-dark dark:bg-meta-4 dark:text-white"
+                                    ? "bg-primary text-white"
+                                    : "bg-gray-2 text-dark dark:bg-meta-4 dark:text-white"
                                     }`}
                             >
                                 {item.name}

@@ -19,6 +19,7 @@ type ConfigWithRelations = ConfiguracionPermitida & { variante: Variante | null,
 export function ProductoMaestroForm({ onClose, onSuccess, initialData }: ProductoMaestroFormProps) {
     // Form States
     const [nombre, setNombre] = useState(initialData?.nombre || "");
+    const [codigo, setCodigo] = useState(initialData?.codigo || "");
     const [descripcion, setDescripcion] = useState(initialData?.descripcion || "");
     const [familiaId, setFamiliaId] = useState<string>(initialData?.familia_id.toString() || "");
     const [varianteId, setVarianteId] = useState<string>(initialData?.variante_id.toString() || "");
@@ -128,6 +129,7 @@ export function ProductoMaestroForm({ onClose, onSuccess, initialData }: Product
             if (initialData) formData.append("id", initialData.id.toString());
 
             formData.append("nombre", nombre);
+            formData.append("codigo", codigo);
             formData.append("descripcion", descripcion);
             formData.append("familia_id", familiaId);
             formData.append("variante_id", varianteId);
@@ -226,6 +228,19 @@ export function ProductoMaestroForm({ onClose, onSuccess, initialData }: Product
                         {varianteId && validTamanos.length === 0 && (
                             <p className="text-xs text-red-500 mt-1">No hay tamaños permitidos para esta variante.</p>
                         )}
+                    </div>
+
+                    <div className="mb-4">
+                        <label className="mb-2.5 block font-medium text-black dark:text-white">
+                            Código <span className="text-xs text-gray-400 font-normal">(Opcional - Se genera automáticamente si está vacío: FAM-VAR-TAM)</span>
+                        </label>
+                        <input
+                            type="text"
+                            value={codigo}
+                            onChange={(e) => setCodigo(e.target.value.toUpperCase())}
+                            placeholder="Ej: ROS-001"
+                            className="w-full rounded border border-stroke bg-white py-3 px-5 outline-none focus:border-primary dark:border-strokedark dark:bg-boxdark font-mono uppercase"
+                        />
                     </div>
 
                     <div className="mb-4">

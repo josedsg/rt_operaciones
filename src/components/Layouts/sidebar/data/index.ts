@@ -26,6 +26,8 @@ export const NAV_DATA: { label: string; items: MenuItem[] }[] = [
             url: "#",
             items: [
               { title: "Tipos de Cliente", url: "/clientes/configuracion/tipos-cliente", items: [] },
+              { title: "Terminales", url: "/clientes/configuracion/terminales", items: [] },
+              { title: "Agencias", url: "/clientes/configuracion/agencias", items: [] },
               { title: "Términos de Pago", url: "/clientes/configuracion/terminos-pago", items: [] },
               { title: "Geografía", url: "/clientes/configuracion/geografia", items: [] },
             ],

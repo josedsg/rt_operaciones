@@ -225,6 +225,7 @@ export function GridProductoMaestro() {
                         <table className="w-full table-auto">
                             <thead>
                                 <tr className="bg-gray-2 text-left dark:bg-meta-4">
+                                    <th className="py-4 px-4 font-medium text-black dark:text-white">Código</th>
                                     <th className="py-4 px-4 font-medium text-black dark:text-white">Nombre</th>
                                     <th className="py-4 px-4 font-medium text-black dark:text-white">Familia</th>
                                     <th className="py-4 px-4 font-medium text-black dark:text-white">Variante</th>
@@ -235,6 +236,7 @@ export function GridProductoMaestro() {
                             <tbody>
                                 {productos.map((prod) => (
                                     <tr key={prod.id} className="border-t border-stroke dark:border-strokedark hover:bg-gray-1 dark:hover:bg-meta-4">
+                                        <td className="py-5 px-4 font-bold text-primary">{prod.codigo || "-"}</td>
                                         <td className="py-5 px-4">
                                             <h5 className="font-medium text-black dark:text-white">{prod.nombre}</h5>
                                             <p className="text-sm">{prod.descripcion}</p>

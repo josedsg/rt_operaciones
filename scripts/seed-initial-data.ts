@@ -227,10 +227,34 @@ async function main() {
                 if (!existingProd) {
                     const nombreProducto = familia.nombre_cientifico;
                     const descripcionProducto = `Variante: ${config.variante.nombre} - Tamaño: ${config.tamano.nombre}`;
+
+                    // Auto-generate code: FAM-001
+                    const fCode = familia.nombre_cientifico.substring(0, 3).toUpperCase();
+
+                    const existingCodes = await prisma.productoMaestro.findMany({
+                        where: { codigo: { startsWith: `${fCode}-` } },
+                        select: { codigo: true }
+                    });
+
+                    let maxNum = 0;
+                    existingCodes.forEach(p => {
+                        const parts = p.codigo?.split('-');
+                        if (parts && parts.length >= 2) {
+                            const num = parseInt(parts[1], 10);
+                            if (!isNaN(num) && num > maxNum) {
+                                maxNum = num;
+                            }
+                        }
+                    });
+
+                    const nextNum = maxNum + 1;
+                    const codigo = `${fCode}-${nextNum.toString().padStart(3, '0')}`;
+
                     const newProd = await prisma.productoMaestro.create({
                         data: {
                             nombre: normalize(nombreProducto),
                             descripcion: normalize(descripcionProducto),
+                            codigo: codigo,
                             familia_id: familia.id,
                             variante_id: config.variante_id!,
                             tamano_id: config.tamano_id!

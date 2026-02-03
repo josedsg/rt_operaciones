@@ -12,7 +12,9 @@ import {
     getTerminosPagoAction,
     getPaisesAction,
     getProvinciasAction,
-    getCantonesAction
+    getCantonesAction,
+    getTerminalesAction,
+    getAgenciasAction
 } from "@/actions/clientes";
 import { getEmpaquesAction } from "@/actions/empaques";
 import { Empaque } from "@prisma/client";
@@ -37,6 +39,10 @@ export default function ClienteForm({ clienteId }: ClienteFormProps) {
     const [cantones, setCantones] = useState<any[]>([]);
     const [distritos, setDistritos] = useState<any[]>([]);
 
+    // New Catalogs
+    const [agencias, setAgencias] = useState<any[]>([]);
+    const [terminales, setTerminales] = useState<any[]>([]);
+
     const [empaques, setEmpaques] = useState<Empaque[]>([]);
     const [selectedEmpaques, setSelectedEmpaques] = useState<number[]>([]);
 
@@ -60,8 +66,8 @@ export default function ClienteForm({ clienteId }: ClienteFormProps) {
         tipo_facturacion: "GRAVADO",
         num_documento_exoneracion: "",
         fecha_vencimiento_exoneracion: "",
-        agencia: "",
-        terminal: ""
+        agencia_id: 0,
+        terminal_id: 0
     });
 
     // Load initial catalogs
@@ -79,6 +85,14 @@ export default function ClienteForm({ clienteId }: ClienteFormProps) {
             setTerminosPago(tp);
             setPaises(pa);
             setProvincias(pr);
+
+            // Load new catalogs
+            const [ags, terms] = await Promise.all([
+                getAgenciasAction(),
+                getTerminalesAction()
+            ]);
+            setAgencias(ags);
+            setTerminales(terms);
 
             const allEmpaques = await getEmpaquesAction();
             setEmpaques(allEmpaques);
@@ -134,8 +148,9 @@ export default function ClienteForm({ clienteId }: ClienteFormProps) {
                         tipo_facturacion: cliente.tipo_facturacion || "GRAVADO",
                         num_documento_exoneracion: cliente.num_documento_exoneracion || "",
                         fecha_vencimiento_exoneracion: cliente.fecha_vencimiento_exoneracion ? cliente.fecha_vencimiento_exoneracion.toString().split('T')[0] : "",
-                        agencia: (cliente as any).agencia || "",
-                        terminal: (cliente as any).terminal || ""
+                        fecha_vencimiento_exoneracion: cliente.fecha_vencimiento_exoneracion ? cliente.fecha_vencimiento_exoneracion.toString().split('T')[0] : "",
+                        agencia_id: (cliente as any).agencia_id || 0,
+                        terminal_id: (cliente as any).terminal_id || 0
                     });
                     const clientWithRelations = cliente as any;
                     if (clientWithRelations.allowed_empaques) {
@@ -456,24 +471,30 @@ export default function ClienteForm({ clienteId }: ClienteFormProps) {
 
                     <div>
                         <label className="mb-2.5 block text-black dark:text-white">Agencia</label>
-                        <input
-                            type="text"
-                            value={formData.agencia}
-                            onChange={(e) => setFormData({ ...formData, agencia: e.target.value })}
+                        <select
+                            value={formData.agencia_id}
+                            onChange={(e) => setFormData({ ...formData, agencia_id: Number(e.target.value) })}
                             className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                            placeholder="Ej. Tikal"
-                        />
+                        >
+                            <option value={0}>Seleccione Agencia...</option>
+                            {agencias.map(a => (
+                                <option key={a.id} value={a.id}>{a.nombre}</option>
+                            ))}
+                        </select>
                     </div>
 
                     <div>
                         <label className="mb-2.5 block text-black dark:text-white">Terminal</label>
-                        <input
-                            type="text"
-                            value={formData.terminal}
-                            onChange={(e) => setFormData({ ...formData, terminal: e.target.value })}
+                        <select
+                            value={formData.terminal_id}
+                            onChange={(e) => setFormData({ ...formData, terminal_id: Number(e.target.value) })}
                             className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                            placeholder="Ej. 12345"
-                        />
+                        >
+                            <option value={0}>Seleccione Terminal...</option>
+                            {terminales.map(t => (
+                                <option key={t.id} value={t.id}>{t.nombre}</option>
+                            ))}
+                        </select>
                     </div>
                 </div>
 

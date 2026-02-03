@@ -11,6 +11,7 @@ import { getEmpaquesAction } from "@/actions/empaques";
 import { Familia, Proveedor } from "@prisma/client";
 import toast from "react-hot-toast";
 import { AssortedModal } from "./assorted-modal";
+import { ProductLookupModal } from "./product-lookup-modal";
 
 interface StepLineasProps {
     data: PedidoVentaInput;
@@ -30,6 +31,7 @@ export function StepLineas({ data, updateData, isReadOnly = false }: StepLineasP
 
     // UI State for Filters/Search
     const [searchFamilia, setSearchFamilia] = useState("");
+    const [searchCode, setSearchCode] = useState("");
     const [searchProducto, setSearchProducto] = useState("");
     const [selectedTipoEmpaque, setSelectedTipoEmpaque] = useState<number>(0);
     const [selectedEmpaqueId, setSelectedEmpaqueId] = useState<number>(0);
@@ -138,6 +140,8 @@ export function StepLineas({ data, updateData, isReadOnly = false }: StepLineasP
     const [selectedProductName, setSelectedProductName] = useState<string>("");
     const [selectedVarianteId, setSelectedVarianteId] = useState<number>(0);
     const [selectedTamanoId, setSelectedTamanoId] = useState<number>(0);
+    const [selectedCode, setSelectedCode] = useState<string>("");
+    const [isLookupModalOpen, setIsLookupModalOpen] = useState(false);
     const [isAssortedModalOpen, setIsAssortedModalOpen] = useState(false);
 
     // Initial filtered products (by Family + Provider)
@@ -181,19 +185,7 @@ export function StepLineas({ data, updateData, isReadOnly = false }: StepLineasP
         return Array.from(tamanos.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
     }, [accessableProductos, selectedProductName, selectedVarianteId]);
 
-    // Effect: Resolve final Product ID when all 3 are selected
-    useEffect(() => {
-        if (selectedProductName && selectedVarianteId && selectedTamanoId) {
-            const match = accessableProductos.find(p =>
-                p.nombre === selectedProductName &&
-                p.variante_id === selectedVarianteId &&
-                p.tamano_id === selectedTamanoId
-            );
-            if (match) {
-                setNewLine(prev => ({ ...prev, producto_id: match.id }));
-            }
-        }
-    }, [selectedProductName, selectedVarianteId, selectedTamanoId, accessableProductos]);
+
 
     // Effect: Partial Reset logic
     // When Familia changes, everything resets (handled by newLine.familia_id change implicitly effectively clearing accessableProductos)
@@ -208,13 +200,14 @@ export function StepLineas({ data, updateData, isReadOnly = false }: StepLineasP
                 if (p.nombre !== selectedProductName) setSelectedProductName(p.nombre);
                 if (p.variante_id !== selectedVarianteId) setSelectedVarianteId(p.variante_id);
                 if (p.tamano_id !== selectedTamanoId) setSelectedTamanoId(p.tamano_id);
+                if (p.codigo && p.codigo !== selectedCode) setSelectedCode(p.codigo);
             }
         } else if (!isEditing) {
             // If we are ADDING and there is no product ID, we might want to clear, 
             // BUT we don't want to clear if the user is in the middle of selecting logic.
             // Usually, when 'newLine' is reset (after add), producto_id becomes 0.
             if (newLine.producto_id === 0 && !selectedProductName && !selectedVarianteId) {
-                // Already cleared or initial
+                setSelectedCode("");
             }
         }
     }, [newLine.producto_id, allProductos, isEditing]);
@@ -247,6 +240,35 @@ export function StepLineas({ data, updateData, isReadOnly = false }: StepLineasP
         return allProductos.find(p => p.id === newLine.producto_id) || null;
     }, [allProductos, newLine.producto_id]);
 
+    // EFECTO: Sincronización Doble Vía (Código <-> Selección Manual)
+
+    // 1. Cuando se selecciona un Código -> Autocompletar todo
+    useEffect(() => {
+        if (!selectedCode) return;
+
+        // Si el código coincide con el producto ya seleccionado, no hacer nada (evitar loop)
+        if (selectedProduct && selectedProduct.codigo === selectedCode) return;
+
+        const match = allProductos.find(p => p.codigo === selectedCode);
+        if (match) {
+            // Set fields directly
+            setNewLine(prev => ({
+                ...prev,
+                familia_id: match.familia_id,
+                producto_id: match.id,
+                variante_id: match.variante_id,
+                tamano_id: match.tamano_id
+            }));
+
+            // Set UI local states
+            setSelectedProductName(match.nombre);
+            setSelectedVarianteId(match.variante_id);
+            setSelectedTamanoId(match.tamano_id);
+        }
+    }, [selectedCode, allProductos, selectedProduct]);
+
+
+
     const filteredEmpaques = useMemo(() => {
         let available = empaques;
 
@@ -271,13 +293,7 @@ export function StepLineas({ data, updateData, isReadOnly = false }: StepLineasP
         return available;
     }, [empaques, selectedTipoEmpaque, currentCliente, selectedProduct]);
 
-    // Reset product when familia changes
-    useEffect(() => {
-        if (newLine.familia_id && selectedProduct && selectedProduct.familia_id !== newLine.familia_id) {
-            setNewLine(prev => ({ ...prev, producto_id: 0, variante_id: 0, tamano_id: 0 }));
-            setSearchProducto("");
-        }
-    }, [newLine.familia_id]);
+
 
     // Reset family/product when provider changes if not allowed anymore
     useEffect(() => {
@@ -365,6 +381,7 @@ export function StepLineas({ data, updateData, isReadOnly = false }: StepLineasP
         // We don't need to manually reset search terms anymore as Combobox handles display via 'value'
         // setSearchFamilia(""); 
         // setSearchProducto("");
+        setSelectedCode("");
         setSelectedEmpaqueId(0);
         setIsEditing(null);
 
@@ -411,6 +428,7 @@ export function StepLineas({ data, updateData, isReadOnly = false }: StepLineasP
             po: ""
         });
         setSelectedEmpaqueId(0);
+        setSelectedCode("");
     }
 
     return (
@@ -433,7 +451,8 @@ export function StepLineas({ data, updateData, isReadOnly = false }: StepLineasP
                     <div className="space-y-6">
                         {/* Fila 1: Origen y Familia */}
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                            <div className="md:col-span-5">
+                            {/* CÓDIGO PRODUCTO - NUEVO */}
+                            <div className="md:col-span-4">
                                 <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
                                     <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white text-xs">1</span>
                                     Proveedor Origen
@@ -450,90 +469,91 @@ export function StepLineas({ data, updateData, isReadOnly = false }: StepLineasP
                                     ))}
                                 </select>
                             </div>
-                            <div className="md:col-span-7">
-                                <Combobox
-                                    label={<><span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white text-xs">2</span>Familia / Tipo de Flor</>}
-                                    labelClassName="text-sm font-bold text-black dark:text-white" // Custom prominent style
-                                    placeholder="Buscar familia..."
-                                    options={filteredFamilias.map(f => ({
-                                        value: f.id,
-                                        label: f.nombre_cientifico,
-                                        secondaryLabel: ""
-                                    }))}
-                                    value={newLine.familia_id}
-                                    onChange={(val) => setNewLine({ ...newLine, familia_id: Number(val) })}
+
+                            {/* CÓDIGO PRODUCTO - NUEVO */}
+                            <div className="md:col-span-3">
+                                <div className="flex items-end gap-2">
+                                    <div className="flex-grow">
+                                        <Combobox
+                                            label={<><span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white text-xs">2</span>Cód. Producto</>}
+                                            labelClassName="text-sm font-bold text-black dark:text-white truncate"
+                                            placeholder="Buscar código..."
+                                            options={useMemo(() => allProductos
+                                                .filter(p => p.codigo) // Only with code
+                                                .map(p => ({
+                                                    value: p.codigo!, // Use code as value
+                                                    label: p.codigo!,
+                                                    secondaryLabel: p.nombre + " " + p.variante.nombre
+                                                }))
+                                                .filter((v, i, a) => a.findIndex(t => t.value === v.value) === i), [allProductos]) // Uniq
+                                            }
+                                            value={selectedCode}
+                                            onChange={(val) => setSelectedCode(String(val))}
+                                        />
+                                    </div>
+                                    <button
+                                        onClick={() => setIsLookupModalOpen(true)}
+                                        className="mb-1 p-2.5 rounded-md bg-primary text-white hover:bg-opacity-90 transition-all"
+                                        title="Buscar Productos Avanzado"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="md:col-span-5">
+                                <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
+                                    <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white text-xs">3</span>
+                                    Familia / Tipo
+                                </label>
+                                <input
+                                    type="text"
+                                    readOnly
+                                    className="w-full rounded-md border border-stroke bg-gray-100 py-2.5 px-4 dark:bg-meta-4 dark:border-strokedark outline-none cursor-not-allowed text-sm font-semibold text-gray-500"
+                                    value={familias.find(f => f.id === newLine.familia_id)?.nombre_cientifico || ""}
+                                    placeholder="Seleccione un código o use la lupa"
                                 />
                             </div>
                         </div>
 
 
-                        {/* Fila 2: Selección en Cascada */}
+                        {/* Fila 2: Detalles del Producto (Solo Lectura) */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
-                                    <span className="mr-2 inline-flex items-center justify-center rounded-full bg-primary h-5 w-5 text-xs text-white">3</span>
+                                    <span className="mr-2 inline-flex items-center justify-center rounded-full bg-primary h-5 w-5 text-xs text-white">4</span>
                                     Producto
                                 </label>
-                                <div className="relative z-20 bg-transparent dark:bg-form-input">
-                                    <select
-                                        className="w-full rounded-md border border-stroke bg-gray-50 py-2 px-4 dark:bg-meta-4 focus:border-primary outline-none text-xs font-bold"
-                                        value={selectedProductName}
-                                        onChange={(e) => {
-                                            setSelectedProductName(e.target.value);
-                                            setSelectedVarianteId(0);
-                                            setSelectedTamanoId(0);
-                                            setNewLine(prev => ({ ...prev, producto_id: 0 }));
-                                        }}
-                                        disabled={!newLine.familia_id}
-                                    >
-                                        <option value="">Seleccionar Producto</option>
-                                        {uniqueProductNames.map((name, i) => (
-                                            <option key={i} value={name}>{name}</option>
-                                        ))}
-                                    </select>
-                                </div>
+                                <input
+                                    type="text"
+                                    readOnly
+                                    className="w-full rounded-md border border-stroke bg-gray-100 py-2 px-4 dark:bg-meta-4 outline-none text-xs font-bold cursor-not-allowed text-gray-500"
+                                    value={selectedProductName}
+                                    placeholder="-"
+                                />
                             </div>
                             <div>
                                 <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
                                     Variedad
                                 </label>
-                                <div className="relative z-20 bg-transparent dark:bg-form-input">
-                                    <select
-                                        className="w-full rounded-md border border-stroke bg-gray-50 py-2 px-4 dark:bg-meta-4 focus:border-primary outline-none text-xs font-bold"
-                                        value={selectedVarianteId}
-                                        onChange={(e) => {
-                                            setSelectedVarianteId(Number(e.target.value));
-                                            setSelectedTamanoId(0);
-                                            setNewLine(prev => ({ ...prev, producto_id: 0 }));
-                                        }}
-                                        disabled={!selectedProductName}
-                                    >
-                                        <option value={0}>Seleccionar Variedad</option>
-                                        {availableVariantes.map((v) => (
-                                            <option key={v.id} value={v.id}>{v.nombre}</option>
-                                        ))}
-                                    </select>
-                                </div>
+                                <input
+                                    type="text"
+                                    readOnly
+                                    className="w-full rounded-md border border-stroke bg-gray-100 py-2 px-4 dark:bg-meta-4 outline-none text-xs font-bold cursor-not-allowed text-gray-500"
+                                    value={allProductos.find(p => p.id === newLine.producto_id)?.variante?.nombre || ""}
+                                    placeholder="-"
+                                />
                             </div>
                             <div>
                                 <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
                                     Tamaño
                                 </label>
-                                <div className="relative z-20 bg-transparent dark:bg-form-input">
-                                    <select
-                                        className="w-full rounded-md border border-stroke bg-gray-50 py-2 px-4 dark:bg-meta-4 focus:border-primary outline-none text-xs font-bold"
-                                        value={selectedTamanoId}
-                                        onChange={(e) => {
-                                            setSelectedTamanoId(Number(e.target.value));
-                                        }}
-                                        disabled={!selectedVarianteId}
-                                    >
-                                        <option value={0}>Seleccionar Tamaño</option>
-                                        {availableTamanos.map((t) => (
-                                            <option key={t.id} value={t.id}>{t.nombre}</option>
-                                        ))}
-                                    </select>
-                                </div>
+                                <input
+                                    type="text"
+                                    readOnly
+                                    className="w-full rounded-md border border-stroke bg-gray-100 py-2 px-4 dark:bg-meta-4 outline-none text-xs font-bold cursor-not-allowed text-gray-500"
+                                    value={allProductos.find(p => p.id === newLine.producto_id)?.tamano?.nombre || ""}
+                                    placeholder="-"
+                                />
                             </div>
                         </div>
 
@@ -541,7 +561,7 @@ export function StepLineas({ data, updateData, isReadOnly = false }: StepLineasP
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-stroke dark:border-strokedark pt-4">
                             <div>
                                 <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
-                                    <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white text-xs">4</span>
+                                    <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white text-xs">5</span>
                                     Tipo de Empaque
                                 </label>
                                 <select
@@ -567,7 +587,7 @@ export function StepLineas({ data, updateData, isReadOnly = false }: StepLineasP
                             </div>
                             <div>
                                 <label className="mb-3 block text-sm font-bold text-black dark:text-white uppercase tracking-wide">
-                                    <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white text-xs">5</span>
+                                    <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white text-xs">6</span>
                                     Configuración de Caja (Empaque)
                                 </label>
                                 <select
@@ -1004,7 +1024,9 @@ export function StepLineas({ data, updateData, isReadOnly = false }: StepLineasP
                         </div>
                     )}
                 </div>
+
                 {selectedProduct && (
+                    /* Assorted Modal */
                     <AssortedModal
                         isOpen={isAssortedModalOpen}
                         onClose={() => setIsAssortedModalOpen(false)}
@@ -1014,6 +1036,30 @@ export function StepLineas({ data, updateData, isReadOnly = false }: StepLineasP
                         onSave={(config) => setNewLine(prev => ({ ...prev, assorted_config: config }))}
                     />
                 )}
+
+                {/* Product Lookup Modal - Always rendered to handle its own state */}
+                <ProductLookupModal
+                    isOpen={isLookupModalOpen}
+                    onClose={() => setIsLookupModalOpen(false)}
+                    onSelect={(product) => {
+                        setNewLine(prev => ({
+                            ...prev,
+                            familia_id: product.familia_id,
+                            producto_id: product.id,
+                            variante_id: product.variante_id,
+                            tamano_id: product.tamano_id
+                        }));
+
+                        // Update UI state
+                        setSelectedProductName(product.nombre);
+                        setSelectedVarianteId(product.variante_id);
+                        setSelectedTamanoId(product.tamano_id);
+                        if (product.codigo) setSelectedCode(product.codigo);
+                    }}
+                    familias={familias}
+                    allProductos={allProductos}
+                    allowedProductIds={allowedProductIds}
+                />
             </div>
         </div>
     );
