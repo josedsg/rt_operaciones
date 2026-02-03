@@ -2,6 +2,11 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { PackingListMatrix } from "./PackingListMatrix";
+import { PackingListFamilySummary } from "./PackingListFamilySummary";
+import { PackingListClientSummary } from "./PackingListClientSummary";
+import { PackingListDetail } from "./PackingListDetail";
+import { PackingListProviderSummary } from "./PackingListProviderSummary";
 
 interface StepPackingProps {
     data: any;
@@ -73,8 +78,11 @@ export function StepPackingList({ data, updateData, onNext, onPrev, hideNavigati
         });
     }, [filteredLines]);
 
+    const [activeTab, setActiveTab] = useState<'detalle' | 'matriz' | 'familias' | 'clientes' | 'proveedores'>('detalle');
+
     return (
         <div className="p-6.5">
+            {/* ... header ... */}
             <h3 className="mb-5 font-medium text-black dark:text-white">
                 Packing List Preliminar
             </h3>
@@ -116,85 +124,75 @@ export function StepPackingList({ data, updateData, onNext, onPrev, hideNavigati
                 </div>
             </div>
 
-            {/* Main Table */}
-            <div className="max-w-full overflow-x-auto rounded border border-stroke dark:border-strokedark mb-8">
-                <table className="w-full table-auto text-xs">
-                    <thead>
-                        <tr className="bg-gray-2 text-left dark:bg-meta-4">
-                            <th className="py-2 px-2 font-medium text-black dark:text-white">Pedido</th>
-                            <th className="py-2 px-2 font-medium text-black dark:text-white">PO</th>
-                            <th className="py-2 px-2 font-medium text-black dark:text-white">Proveedor</th>
-                            <th className="py-2 px-2 font-medium text-black dark:text-white">Cliente</th>
-                            <th className="py-2 px-2 font-medium text-black dark:text-white">Familia</th>
-                            <th className="py-2 px-2 font-medium text-black dark:text-white">Producto</th>
-                            <th className="py-2 px-2 font-medium text-black dark:text-white">Variante</th>
-                            <th className="py-2 px-2 font-medium text-black dark:text-white">Tamaño</th>
-                            <th className="py-2 px-2 font-medium text-black dark:text-white">Cajas</th>
-                            <th className="py-2 px-2 font-medium text-black dark:text-white">Tallos/Ramo</th>
-                            <th className="py-2 px-2 font-medium text-black dark:text-white">Ramos/Caja</th>
-                            <th className="py-2 px-2 font-medium text-black dark:text-white">Total Tallos</th>
-                            <th className="py-2 px-2 font-medium text-black dark:text-white">Terminal</th>
-                            <th className="py-2 px-2 font-medium text-black dark:text-white">Agencia</th>
-                            <th className="py-2 px-2 font-medium text-black dark:text-white">AWD</th>
-                            <th className="py-2 px-2 font-medium text-black dark:text-white whitespace-nowrap">Precio Prov.</th>
-                            <th className="py-2 px-2 font-medium text-black dark:text-white whitespace-nowrap">Precio Unit.</th>
-                            <th className="py-2 px-2 font-medium text-black dark:text-white">Importe</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredLines.map((line: any, idx: number) => (
-                            <tr key={idx} className="border-b border-stroke dark:border-strokedark hover:bg-gray-1 dark:hover:bg-meta-4">
-                                <td className="py-2 px-2 font-bold text-black border-r border-gray-200 dark:border-strokedark">
-                                    {line.order_code || line.pedido_codigo || 'PV-???'}
-                                </td>
-                                <td className="py-2 px-2">{line.po || line.order_po}</td>
-                                <td className="py-2 px-2">{line.proveedor?.nombre || '-'}</td>
-                                <td className="py-2 px-2">{line.client_name}</td>
-                                <td className="py-2 px-2">{line.familia?.nombre_cientifico || '-'}</td>
-                                <td className="py-2 px-2 font-semibold">{line.producto?.nombre}</td>
-                                <td className="py-2 px-2">{line.variante?.nombre}</td>
-                                <td className="py-2 px-2">{line.tamano?.nombre}</td>
-                                <td className="py-2 px-2 font-bold">{line.cajas}</td>
-                                <td className="py-2 px-2">{line.stems_per_box}</td>
-                                <td className="py-2 px-2">{line.bunches_per_box}</td>
-                                <td className="py-2 px-2">{line.total_stems}</td>
-                                <td className="py-2 px-2">{line.terminal}</td>
-                                <td className="py-2 px-2">{line.agencia}</td>
-                                <td className="py-2 px-2">{line.awd}</td>
-                                <td className="py-2 px-2 text-right">${line.precio_proveedor?.toFixed(2)}</td>
-                                <td className="py-2 px-2 text-right">${line.precio_unitario?.toFixed(2)}</td>
-                                <td className="py-2 px-2 text-right">${line.net_amount?.toFixed(2)}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+            {/* Tabs */}
+            <div className="mb-6 flex gap-4 border-b border-stroke dark:border-strokedark pb-2 overflow-x-auto">
+                <button
+                    onClick={() => setActiveTab('detalle')}
+                    className={`pb-2 px-4 font-medium transition-colors whitespace-nowrap ${activeTab === 'detalle'
+                        ? 'border-b-2 border-primary text-primary'
+                        : 'text-gray-500 hover:text-primary'
+                        }`}
+                >
+                    Detalle
+                </button>
+                <button
+                    onClick={() => setActiveTab('matriz')}
+                    className={`pb-2 px-4 font-medium transition-colors whitespace-nowrap ${activeTab === 'matriz'
+                        ? 'border-b-2 border-primary text-primary'
+                        : 'text-gray-500 hover:text-primary'
+                        }`}
+                >
+                    Informe de Carga
+                </button>
+                <button
+                    onClick={() => setActiveTab('familias')}
+                    className={`pb-2 px-4 font-medium transition-colors whitespace-nowrap ${activeTab === 'familias'
+                        ? 'border-b-2 border-primary text-primary'
+                        : 'text-gray-500 hover:text-primary'
+                        }`}
+                >
+                    Resumen Familias
+                </button>
+                <button
+                    onClick={() => setActiveTab('clientes')}
+                    className={`pb-2 px-4 font-medium transition-colors whitespace-nowrap ${activeTab === 'clientes'
+                        ? 'border-b-2 border-primary text-primary'
+                        : 'text-gray-500 hover:text-primary'
+                        }`}
+                >
+                    Resumen Clientes
+                </button>
+                <button
+                    onClick={() => setActiveTab('proveedores')}
+                    className={`pb-2 px-4 font-medium transition-colors whitespace-nowrap ${activeTab === 'proveedores'
+                        ? 'border-b-2 border-primary text-primary'
+                        : 'text-gray-500 hover:text-primary'
+                        }`}
+                >
+                    Resumen Proveedores
+                </button>
             </div>
 
-            <h3 className="mb-4 font-medium text-black dark:text-white">
-                Resumen por Cajas (Cliente / Producto / Empaque)
-            </h3>
-            <div className="max-w-2xl overflow-x-auto rounded border border-stroke dark:border-strokedark">
-                <table className="w-full table-auto">
-                    <thead>
-                        <tr className="bg-gray-2 text-left dark:bg-meta-4">
-                            <th className="py-2 px-4 font-medium text-black dark:text-white">Cliente</th>
-                            <th className="py-2 px-4 font-medium text-black dark:text-white">Producto</th>
-                            <th className="py-2 px-4 font-medium text-black dark:text-white">Empaque</th>
-                            <th className="py-2 px-4 font-medium text-black dark:text-white">Total Cajas</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {summary.map((row: any, idx: number) => (
-                            <tr key={idx} className="border-b border-stroke dark:border-strokedark">
-                                <td className="py-2 px-4">{row.client}</td>
-                                <td className="py-2 px-4">{row.product}</td>
-                                <td className="py-2 px-4">{row.empaque}</td>
-                                <td className="py-2 px-4 font-bold">{row.boxes}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            {/* Content Based on Tab */}
+            {activeTab === 'detalle' && (
+                <PackingListDetail lines={filteredLines} summary={summary} />
+            )}
+
+            {activeTab === 'matriz' && (
+                <PackingListMatrix lines={filteredLines} />
+            )}
+
+            {activeTab === 'familias' && (
+                <PackingListFamilySummary lines={filteredLines} />
+            )}
+
+            {activeTab === 'clientes' && (
+                <PackingListClientSummary lines={filteredLines} />
+            )}
+
+            {activeTab === 'proveedores' && (
+                <PackingListProviderSummary lines={filteredLines} />
+            )}
 
             {!hideNavigation && (
                 <div className="mt-10 flex justify-end gap-4">
