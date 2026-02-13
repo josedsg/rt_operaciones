@@ -526,3 +526,20 @@ export async function confirmPedidoAction(id: number) {
         throw new Error("Error al confirmar pedido");
     }
 }
+
+export async function confirmPedidoBatchAction(ids: number[]) {
+    try {
+        if (!ids || ids.length === 0) return { success: false, count: 0 };
+
+        await prisma.pedidoVenta.updateMany({
+            where: { id: { in: ids }, estado: "BORRADOR" },
+            data: { estado: "CONFIRMADO" }
+        });
+
+        revalidatePath("/ventas");
+        return { success: true };
+    } catch (error) {
+        console.error("Error confirming batch pedidos:", error);
+        throw new Error("Error al confirmar pedidos masivamente");
+    }
+}

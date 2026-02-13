@@ -23,6 +23,55 @@ export default function VentasPage() {
         id: 0
     });
 
+    // Bulk Selection State
+    const [selectedIds, setSelectedIds] = useState<number[]>([]);
+
+    const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.checked) {
+            setSelectedIds(pedidos.map(p => p.id));
+        } else {
+            setSelectedIds([]);
+        }
+    };
+
+    const handleSelectRow = (id: number) => {
+        if (selectedIds.includes(id)) {
+            setSelectedIds(selectedIds.filter(i => i !== id));
+        } else {
+            setSelectedIds([...selectedIds, id]);
+        }
+    };
+
+    const handleBatchConfirm = async () => {
+        if (!confirm(`¿Confirmar ${selectedIds.length} pedidos seleccionados?`)) return;
+
+        const toastId = toast.loading("Confirmando pedidos...");
+        try {
+            const { confirmPedidoBatchAction } = await import("@/actions/ventas");
+            await confirmPedidoBatchAction(selectedIds);
+            toast.success("Pedidos confirmados correctamente", { id: toastId });
+            setSelectedIds([]);
+            fetchPedidos();
+        } catch (error) {
+            toast.error("Error al confirmar pedidos", { id: toastId });
+        }
+    };
+
+    const handleBatchDelete = async () => {
+        if (!confirm(`¿ELIMINAR ${selectedIds.length} pedidos seleccionados? Esta acción no se puede deshacer.`)) return;
+
+        const toastId = toast.loading("Eliminando pedidos...");
+        try {
+            const { deletePedidoBatchAction } = await import("@/actions/ventas");
+            await deletePedidoBatchAction(selectedIds);
+            toast.success("Pedidos eliminados correctamente", { id: toastId });
+            setSelectedIds([]);
+            fetchPedidos();
+        } catch (error) {
+            toast.error("Error al eliminar pedidos", { id: toastId });
+        }
+    };
+
     const fetchPedidos = async () => {
         setLoading(true);
         try {
@@ -200,10 +249,39 @@ export default function VentasPage() {
                 </div>
             ) : (
                 <div className="bg-white dark:bg-boxdark rounded-sm border border-stroke dark:border-strokedark shadow-default overflow-hidden">
+                    <div className="p-4 border-b border-stroke dark:border-strokedark flex justify-between items-center">
+                        <span className="text-sm font-medium text-black dark:text-white">
+                            {selectedIds.length > 0 ? `${selectedIds.length} Seleccionados` : "Listado de Pedidos"}
+                        </span>
+                        {selectedIds.length > 0 && (
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleBatchDelete}
+                                    className="inline-flex items-center justify-center rounded bg-danger px-4 py-1 text-sm font-medium text-white hover:bg-opacity-90"
+                                >
+                                    Eliminar ({selectedIds.length})
+                                </button>
+                                <button
+                                    onClick={handleBatchConfirm}
+                                    className="inline-flex items-center justify-center rounded bg-primary px-4 py-1 text-sm font-medium text-white hover:bg-opacity-90"
+                                >
+                                    Confirmar ({selectedIds.length})
+                                </button>
+                            </div>
+                        )}
+                    </div>
                     <div className="overflow-x-auto">
                         <table className="w-full table-auto">
                             <thead>
                                 <tr className="bg-gray-2 text-left dark:bg-meta-4">
+                                    <th className="py-4 px-4 font-medium text-black dark:text-white w-10">
+                                        <input
+                                            type="checkbox"
+                                            onChange={handleSelectAll}
+                                            checked={pedidos.length > 0 && selectedIds.length === pedidos.length}
+                                            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                        />
+                                    </th>
                                     <th className="py-4 px-4 font-medium text-black dark:text-white">Código</th>
                                     <th className="py-4 px-4 font-medium text-black dark:text-white">Cliente</th>
                                     <th className="py-4 px-4 font-medium text-black dark:text-white">Fecha</th>
@@ -216,6 +294,14 @@ export default function VentasPage() {
                             <tbody>
                                 {pedidos.map((pedido) => (
                                     <tr key={pedido.id} className="border-t border-stroke dark:border-strokedark hover:bg-gray-1 dark:hover:bg-meta-4">
+                                        <td className="py-5 px-4">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedIds.includes(pedido.id)}
+                                                onChange={() => handleSelectRow(pedido.id)}
+                                                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                            />
+                                        </td>
                                         <td className="py-5 px-4 font-medium">{pedido.codigo}</td>
                                         <td className="py-5 px-4">{pedido.cliente.nombre}</td>
                                         <td className="py-5 px-4">{new Date(pedido.fecha_pedido).toLocaleDateString()}</td>
