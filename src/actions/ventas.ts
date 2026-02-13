@@ -543,3 +543,19 @@ export async function confirmPedidoBatchAction(ids: number[]) {
         throw new Error("Error al confirmar pedidos masivamente");
     }
 }
+
+export async function deletePedidoBatchAction(ids: number[]) {
+    try {
+        if (!ids || ids.length === 0) return { success: false, count: 0 };
+
+        await prisma.pedidoVenta.deleteMany({
+            where: { id: { in: ids } }
+        });
+
+        revalidatePath("/ventas");
+        return { success: true };
+    } catch (error) {
+        console.error("Error deleting batch pedidos:", error);
+        throw new Error("Error al eliminar pedidos masivamente");
+    }
+}

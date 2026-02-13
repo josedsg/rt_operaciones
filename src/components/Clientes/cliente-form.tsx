@@ -148,7 +148,6 @@ export default function ClienteForm({ clienteId }: ClienteFormProps) {
                         tipo_facturacion: cliente.tipo_facturacion || "GRAVADO",
                         num_documento_exoneracion: cliente.num_documento_exoneracion || "",
                         fecha_vencimiento_exoneracion: cliente.fecha_vencimiento_exoneracion ? cliente.fecha_vencimiento_exoneracion.toString().split('T')[0] : "",
-                        fecha_vencimiento_exoneracion: cliente.fecha_vencimiento_exoneracion ? cliente.fecha_vencimiento_exoneracion.toString().split('T')[0] : "",
                         agencia_id: (cliente as any).agencia_id || 0,
                         terminal_id: (cliente as any).terminal_id || 0
                     });
